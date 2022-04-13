@@ -1,0 +1,25 @@
+﻿<Project>
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+
+    <LangVersion>latest</LangVersion>
+  </PropertyGroup>
+
+  <!--Package Info-->
+  <PropertyGroup>
+    <VersionPrefix>1.0.0-pre-1</VersionPrefix>
+
+    <Description>a tool for generate Localized IntelliSense files. 用于生成本地化IntelliSense文件的工具。</Description>
+
+    <Authors>stratos</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageProjectUrl>https://github.com/stratosblue/intellisenselocalizer</PackageProjectUrl>
+
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+
+    <PackageTags>localized-intellisense;intellisense;localization</PackageTags>
+  </PropertyGroup>
+</Project>

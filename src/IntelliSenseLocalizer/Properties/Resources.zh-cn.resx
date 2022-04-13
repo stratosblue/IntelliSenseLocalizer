@@ -1,0 +1,213 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <!-- 
+    Microsoft ResX Schema 
+    
+    Version 2.0
+    
+    The primary goals of this format is to allow a simple XML format 
+    that is mostly human readable. The generation and parsing of the 
+    various data types are done through the TypeConverter classes 
+    associated with the data types.
+    
+    Example:
+    
+    ... ado.net/XML headers & schema ...
+    <resheader name="resmimetype">text/microsoft-resx</resheader>
+    <resheader name="version">2.0</resheader>
+    <resheader name="reader">System.Resources.ResXResourceReader, System.Windows.Forms, ...</resheader>
+    <resheader name="writer">System.Resources.ResXResourceWriter, System.Windows.Forms, ...</resheader>
+    <data name="Name1"><value>this is my long string</value><comment>this is a comment</comment></data>
+    <data name="Color1" type="System.Drawing.Color, System.Drawing">Blue</data>
+    <data name="Bitmap1" mimetype="application/x-microsoft.net.object.binary.base64">
+        <value>[base64 mime encoded serialized .NET Framework object]</value>
+    </data>
+    <data name="Icon1" type="System.Drawing.Icon, System.Drawing" mimetype="application/x-microsoft.net.object.bytearray.base64">
+        <value>[base64 mime encoded string representing a byte array form of the .NET Framework object]</value>
+        <comment>This is a comment</comment>
+    </data>
+                
+    There are any number of "resheader" rows that contain simple 
+    name/value pairs.
+    
+    Each data row contains a name, and value. The row also contains a 
+    type or mimetype. Type corresponds to a .NET class that support 
+    text/value conversion through the TypeConverter architecture. 
+    Classes that don't support this are serialized and stored with the 
+    mimetype set.
+    
+    The mimetype is used for serialized objects, and tells the 
+    ResXResourceReader how to depersist the object. This is currently not 
+    extensible. For a given mimetype the value must be set accordingly:
+    
+    Note - application/x-microsoft.net.object.binary.base64 is the format 
+    that the ResXResourceWriter will generate, however the reader can 
+    read any of the formats listed below.
+    
+    mimetype: application/x-microsoft.net.object.binary.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
+            : and then encoded with base64 encoding.
+    
+    mimetype: application/x-microsoft.net.object.soap.base64
+    value   : The object must be serialized with 
+            : System.Runtime.Serialization.Formatters.Soap.SoapFormatter
+            : and then encoded with base64 encoding.
+
+    mimetype: application/x-microsoft.net.object.bytearray.base64
+    value   : The object must be serialized into a byte array 
+            : using a System.ComponentModel.TypeConverter
+            : and then encoded with base64 encoding.
+    -->
+  <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
+    <xsd:element name="root" msdata:IsDataSet="true">
+      <xsd:complexType>
+        <xsd:choice maxOccurs="unbounded">
+          <xsd:element name="metadata">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" />
+              </xsd:sequence>
+              <xsd:attribute name="name" use="required" type="xsd:string" />
+              <xsd:attribute name="type" type="xsd:string" />
+              <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="assembly">
+            <xsd:complexType>
+              <xsd:attribute name="alias" type="xsd:string" />
+              <xsd:attribute name="name" type="xsd:string" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="data">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+                <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
+              <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
+              <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
+            </xsd:complexType>
+          </xsd:element>
+          <xsd:element name="resheader">
+            <xsd:complexType>
+              <xsd:sequence>
+                <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
+              </xsd:sequence>
+              <xsd:attribute name="name" type="xsd:string" use="required" />
+            </xsd:complexType>
+          </xsd:element>
+        </xsd:choice>
+      </xsd:complexType>
+    </xsd:element>
+  </xsd:schema>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="StringCMDBuildDescription" xml:space="preserve">
+    <value>生成本地化的智能感知文件。</value>
+  </data>
+  <data name="StringCMDBuildOptionLocaleDescription" xml:space="preserve">
+    <value>指定区域。如 "zh-cn"。默认使用系统的区域信息。</value>
+  </data>
+  <data name="StringCMDBuildOptionNoCacheDescription" xml:space="preserve">
+    <value>指定不使用本地已存在的页面缓存。</value>
+  </data>
+  <data name="StringCMDBuildOptionOutputDescription" xml:space="preserve">
+    <value>指定输出目录。</value>
+  </data>
+  <data name="StringCMDBuildOptionPackDescription" xml:space="preserve">
+    <value>指定应用程序包。如 "Microsoft.AspNetCore.App"。默认处理所有的包。</value>
+  </data>
+  <data name="StringCMDBuildOptionParallelCountDescription" xml:space="preserve">
+    <value>设置并行处理数量，过大的值将导致微软很快会阻止你的IP访问。</value>
+  </data>
+  <data name="StringCMDBuildOptionVersionDescription" xml:space="preserve">
+    <value>指定.net版本。如 "6.0.3"。默认处理最新的版本。</value>
+  </data>
+  <data name="StringCMDClearDescription" xml:space="preserve">
+    <value>清理下载或缓存文件。</value>
+  </data>
+  <data name="StringCMDInstallDescription" xml:space="preserve">
+    <value>安装本地化的智能感知文件。（从源文件夹.xml文件到目标SDK包目录）</value>
+  </data>
+  <data name="StringCMDInstallOptionLocaleDescription" xml:space="preserve">
+    <value>指定区域。如 "zh-cn"。默认复制所有文件。</value>
+  </data>
+  <data name="StringCMDInstallOptionSourceDescription" xml:space="preserve">
+    <value>指定安装的源文件夹。</value>
+  </data>
+  <data name="StringCMDInstallOptionTargetDescription" xml:space="preserve">
+    <value>指定安装的目标SDK文件夹。</value>
+  </data>
+  <data name="StringCMDInstallOptionVersionDescription" xml:space="preserve">
+    <value>指定.net版本。如 "6.0.3"。默认复制所有文件。</value>
+  </data>
+  <data name="StringCMDLoadArgumentSourceDescription" xml:space="preserve">
+    <value>要加载的文件压缩包路径。</value>
+  </data>
+  <data name="StringCMDLoadDescription" xml:space="preserve">
+    <value>加载本地化的智能感知文件压缩包。</value>
+  </data>
+  <data name="StringCMDLoadOptionTargetDescription" xml:space="preserve">
+    <value>解压文件压缩包的目标路径。</value>
+  </data>
+  <data name="StringCMDShowDescription" xml:space="preserve">
+    <value>查询和展示已安装SDK的更多信息。</value>
+  </data>
+  <data name="StringCMDShowOptionPackDescription" xml:space="preserve">
+    <value>用于筛选应用程序包的正则字符串。</value>
+  </data>
+  <data name="StringCMDShowOptionVersionDescription" xml:space="preserve">
+    <value>用于筛选版本的正则字符串。</value>
+  </data>
+  <data name="StringCMDShowPackRefsDescription" xml:space="preserve">
+    <value>列出应用程序包的引用文件。</value>
+  </data>
+  <data name="StringCMDShowPacksDescription" xml:space="preserve">
+    <value>列出应用程序包。</value>
+  </data>
+  <data name="StringCMDUnInstallArgumentLocaleDescription" xml:space="preserve">
+    <value>指定区域。如 "zh-cn"。</value>
+  </data>
+  <data name="StringCMDUnInstallArgumentMonikerDescription" xml:space="preserve">
+    <value>指定框架名称。如"net6.0"。</value>
+  </data>
+  <data name="StringCMDUnInstallDescription" xml:space="preserve">
+    <value>移除已安装的本地化智能感知文件。</value>
+  </data>
+  <data name="StringCMDUnInstallOptionTargetDescription" xml:space="preserve">
+    <value>指定卸载的目标SDK文件夹。</value>
+  </data>
+  <data name="StringOptionFilterDescription" xml:space="preserve">
+    <value>用于过滤结果的正则字符串。</value>
+  </data>
+  <data name="StringOptionLogLevelDescription" xml:space="preserve">
+    <value>设置日志等级 0 - 5 。</value>
+  </data>
+  <data name="StringRootCommandDescription" xml:space="preserve">
+    <value>用于生成本地化智能感知文件的工具
+示例:
+展示Microsoft.NETCore.App的6.0.3版本中包含'threading'的xml文件:
+.\islocalizer show refs -p Microsoft.NETCore.App -v 6.0.3 -f threading
+构建Microsoft.AspNetCore.App的6.0.3的本地化智能感知文件:
+.\islocalizer build -p Microsoft.AspNetCore.App -v 6.0.3
+安装已构建好的文件 (可能需要以管理员身份运行):
+.\islocalizer install
+清理构建的缓存:
+.\islocalizer clear cache</value>
+  </data>
+</root>
