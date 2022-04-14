@@ -2,9 +2,9 @@
   "profiles": {
     "IntelliSenseLocalizer": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] build -p Microsoft.AspNetCore.App -v 6.0.3 -ll 0 -cc 1"
+      "commandLineArgs": "[debug] build -p Microsoft.AspNetCore.App -v 6.0.4 -ll 0 -cc 1"
       //"commandLineArgs": "[debug] clear cache"
-      //"commandLineArgs": "[debug] install",
+      //"commandLineArgs": "[debug] install"
       //"commandLineArgs": "[debug] uninstall net5.0 zh-hans"
       //"commandLineArgs": "[debug] load \".\\dotnet-intellisense-6.0-zh-cn.zip\""
     }

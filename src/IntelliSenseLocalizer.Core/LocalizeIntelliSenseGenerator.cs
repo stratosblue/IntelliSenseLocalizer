@@ -62,7 +62,7 @@ public class LocalizeIntelliSenseGenerator
             CancellationToken = cancellationToken,
         };
 
-        var groups = intelliSenseItems.GroupBy(x => x.GetMicrosoftDocsQueryKey()).ToArray();
+        var groups = intelliSenseItems.GroupBy(x => x.GetMicrosoftDocsQueryKey()).Reverse().ToArray();
 
         await Parallel.ForEachAsync(groups, parallelOptions, async (intelliSenseItemGroup, token) =>
         {

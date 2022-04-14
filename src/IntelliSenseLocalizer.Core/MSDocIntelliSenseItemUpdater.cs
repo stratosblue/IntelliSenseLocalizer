@@ -30,7 +30,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 
     public async Task UpdateAsync(IGrouping<string, IntelliSenseItemDescriptor> intelliSenseItemGroup, CancellationToken cancellationToken)
     {
-        var currentGroupItems = intelliSenseItemGroup.ToArray();
+        var currentGroupItems = intelliSenseItemGroup.Reverse().ToArray();
 
         _logger.LogTrace("Start Process IntelliSense Item Group [{Key}] GroupSize: {Size}", intelliSenseItemGroup.Key, currentGroupItems.Length);
 
@@ -229,11 +229,12 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                 break;
         }
 
-        void UpdateElementsContent(XmlNodeList elements, HtmlNode summerHtmlNode)
+        void UpdateElementsContent(XmlNodeList elements, HtmlNode htmlNode)
         {
-            foreach (XmlElement item in elements)
+            for (int i = elements.Count - 1; i >= 0; i--)
             {
-                UpdateElementContent(descriptor, item, summerHtmlNode);
+                var item = (XmlElement)elements[i]!;
+                UpdateElementContent(descriptor, item, htmlNode);
             }
         }
     }
