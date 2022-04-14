@@ -34,9 +34,27 @@ internal partial class Program
             BuildClearCommand(),
         };
 
-        rootCommand.AddGlobalOption(s_logLevelOption);
+        var customOption = new Option<string?>("--custom", () => null, "Custom addon options.");
 
-        return rootCommand.Invoke(args);
+        rootCommand.AddGlobalOption(s_logLevelOption);
+        rootCommand.AddGlobalOption(customOption);
+
+        var result = rootCommand.Invoke(args);
+
+        var optionParseResult = customOption.Parse(args);
+
+        // process like waitexit-20s
+        if (optionParseResult.CommandResult.GetValueForOption(customOption) is string customOptionString
+            && Regex.Match(customOptionString, @"delay-exit-(\d+)s") is Match waitSecondsMatch
+            && waitSecondsMatch.Groups.Count > 1
+            && int.TryParse(waitSecondsMatch.Groups[1].Value, out var waitSeconds)
+            && waitSeconds > 0)
+        {
+            Console.WriteLine($"Program will exit at {waitSeconds} seconds later.");
+            Thread.Sleep(waitSeconds * 1000);
+        }
+
+        return result;
     }
 
     #region Base
