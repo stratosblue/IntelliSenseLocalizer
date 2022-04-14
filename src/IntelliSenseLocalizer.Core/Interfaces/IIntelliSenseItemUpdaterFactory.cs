@@ -4,5 +4,5 @@ namespace IntelliSenseLocalizer;
 
 public interface IIntelliSenseItemUpdaterFactory
 {
-    IIntelliSenseItemUpdater GetUpdater(CultureInfo cultureInfo);
+    IIntelliSenseItemUpdater GetUpdater(GenerateContext generateContext);
 }

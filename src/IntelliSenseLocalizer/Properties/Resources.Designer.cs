@@ -70,6 +70,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 set the content compare type. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDBuildOptionContentCompareDescription {
+            get {
+                return ResourceManager.GetString("StringCMDBuildOptionContentCompareDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 select locale. eg: &quot;zh-cn&quot;. use the system culture info default. 的本地化字符串。
         /// </summary>
         internal static string StringCMDBuildOptionLocaleDescription {

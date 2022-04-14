@@ -2,21 +2,23 @@
 using System.Xml;
 
 using IntelliSenseLocalizer.Models;
+
 using Microsoft.Extensions.Logging;
 
 namespace IntelliSenseLocalizer;
 
 public class GenerateContext
 {
+    public ContentCompareType ContentCompareType { get; }
+
     public CultureInfo CultureInfo { get; }
 
     public IntelliSenseFileDescriptor Descriptor { get; }
 
     public string OutputPath { get; }
-
     public int ParallelCount { get; set; } = 2;
 
-    public GenerateContext(IntelliSenseFileDescriptor descriptor, string outputPath, CultureInfo cultureInfo)
+    public GenerateContext(IntelliSenseFileDescriptor descriptor, ContentCompareType contentCompareType, string outputPath, CultureInfo cultureInfo)
     {
         if (string.IsNullOrEmpty(outputPath))
         {
@@ -24,6 +26,7 @@ public class GenerateContext
         }
 
         Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
+        ContentCompareType = contentCompareType;
         OutputPath = outputPath;
         CultureInfo = cultureInfo ?? throw new ArgumentNullException(nameof(cultureInfo));
     }
@@ -49,7 +52,7 @@ public class LocalizeIntelliSenseGenerator
         var xmlDocument = new XmlDocument();
         xmlDocument.Load(context.Descriptor.FilePath);
 
-        var intelliSenseItemUpdater = _intelliSenseItemUpdaterFactory.GetUpdater(context.CultureInfo);
+        var intelliSenseItemUpdater = _intelliSenseItemUpdaterFactory.GetUpdater(context);
 
         var intelliSenseItems = _intelliSenseItemProvider.GetItems(xmlDocument, context.Descriptor).ToList();
 

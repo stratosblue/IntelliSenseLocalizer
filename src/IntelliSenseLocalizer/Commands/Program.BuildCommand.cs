@@ -15,6 +15,7 @@ internal partial class Program
         var packNameOption = new Option<string>(new[] { "-p", "--pack" }, Resources.StringCMDBuildOptionPackDescription);
         var versionOption = new Option<string>(new[] { "-v", "--version" }, Resources.StringCMDBuildOptionVersionDescription);
         var localeOption = new Option<string>(new[] { "-l", "--locale" }, () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDBuildOptionLocaleDescription);
+        var contentCompareTypeOption = new Option<ContentCompareType>(new[] { "-cc", "--content-compare" }, () => ContentCompareType.OriginFirst, Resources.StringCMDBuildOptionContentCompareDescription);
         var outputOption = new Option<string>(new[] { "-o", "--output" }, () => LocalizerEnvironment.OutputRoot, Resources.StringCMDBuildOptionOutputDescription);
         var parallelCountOption = new Option<int>(new[] { "-pc", "--parallel-count" }, () => 2, Resources.StringCMDBuildOptionParallelCountDescription);
         var nocacheOption = new Option<bool>(new[] { "-nc", "--no-cache" }, () => false, Resources.StringCMDBuildOptionNoCacheDescription);
@@ -24,17 +25,18 @@ internal partial class Program
             packNameOption,
             versionOption,
             localeOption,
+            contentCompareTypeOption,
             outputOption,
             parallelCountOption,
             nocacheOption,
         };
 
-        buildCommand.SetHandler<string, string, string, string, bool, int, int?>(BuildLocalizedIntelliSenseFile, packNameOption, versionOption, localeOption, outputOption, nocacheOption, parallelCountOption, s_logLevelOption);
+        buildCommand.SetHandler<string, string, string, ContentCompareType, string, bool, int, int?>(BuildLocalizedIntelliSenseFile, packNameOption, versionOption, localeOption, contentCompareTypeOption, outputOption, nocacheOption, parallelCountOption, s_logLevelOption);
 
         return buildCommand;
     }
 
-    private static void BuildLocalizedIntelliSenseFile(string packName, string versionString, string locale, string outputRoot, bool noCache, int parallelCout, int? logLevel)
+    private static void BuildLocalizedIntelliSenseFile(string packName, string versionString, string locale, ContentCompareType contentCompareType, string outputRoot, bool noCache, int parallelCout, int? logLevel)
     {
         locale = string.IsNullOrWhiteSpace(locale) ? LocalizerEnvironment.CurrentLocale : locale;
         CultureInfo cultureInfo;
@@ -124,7 +126,7 @@ internal partial class Program
                                                 packRefDescriptor.PackVersion,
                                                 intelliSenseFileDescriptor.Name);
 
-                        var context = new GenerateContext(intelliSenseFileDescriptor, outputPath, cultureInfo);
+                        var context = new GenerateContext(intelliSenseFileDescriptor, contentCompareType, outputPath, cultureInfo);
 
                         await generator.GenerateAsync(context, default);
                     }

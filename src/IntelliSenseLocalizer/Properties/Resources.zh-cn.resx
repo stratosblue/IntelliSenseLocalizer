@@ -120,6 +120,9 @@
   <data name="StringCMDBuildDescription" xml:space="preserve">
     <value>生成本地化的智能感知文件。</value>
   </data>
+  <data name="StringCMDBuildOptionContentCompareDescription" xml:space="preserve">
+    <value>设置内容比较类型。</value>
+  </data>
   <data name="StringCMDBuildOptionLocaleDescription" xml:space="preserve">
     <value>指定区域。如 "zh-cn"。默认使用系统的区域信息。</value>
   </data>

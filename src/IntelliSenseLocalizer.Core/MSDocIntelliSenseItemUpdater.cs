@@ -1,8 +1,8 @@
-﻿using System.Globalization;
-using System.Net;
+﻿using System.Net;
 using System.Xml;
 
 using HtmlAgilityPack;
+
 using IntelliSenseLocalizer.Models;
 
 using Microsoft.Extensions.Logging;
@@ -15,13 +15,17 @@ namespace IntelliSenseLocalizer;
 /// </summary>
 public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 {
+    private readonly ContentCompareType _contentCompareType;
     private readonly IIntelliSenseItemWebPageDownloader _downloader;
+    private readonly GenerateContext _generateContext;
     private readonly ILogger _logger;
 
-    public MSDocIntelliSenseItemUpdater(CultureInfo cultureInfo, ILogger logger)
+    public MSDocIntelliSenseItemUpdater(GenerateContext generateContext, ILogger logger)
     {
+        _generateContext = generateContext ?? throw new ArgumentNullException(nameof(generateContext));
+        _contentCompareType = generateContext.ContentCompareType;
         _logger = logger ?? NullLogger.Instance;
-        _downloader = new DefaultIntelliSenseItemWebPageDownloader(cultureInfo, LocalizerEnvironment.CacheRoot);
+        _downloader = new DefaultIntelliSenseItemWebPageDownloader(generateContext.CultureInfo, LocalizerEnvironment.CacheRoot);
     }
 
     public async Task UpdateAsync(IGrouping<string, IntelliSenseItemDescriptor> intelliSenseItemGroup, CancellationToken cancellationToken)
@@ -103,6 +107,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
     /// <param name="htmlNode"></param>
     protected virtual void UpdateElementContent(IntelliSenseItemDescriptor descriptor, XmlElement element, HtmlNode htmlNode)
     {
+        //TODO process different _contentCompareType
         element.AppendChild(element.CreateParaNode());
 
         XmlNode? appendLastNode = null;

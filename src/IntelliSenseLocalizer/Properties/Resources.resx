@@ -120,6 +120,9 @@
   <data name="StringCMDBuildDescription" xml:space="preserve">
     <value>build the localized intellisense file.</value>
   </data>
+  <data name="StringCMDBuildOptionContentCompareDescription" xml:space="preserve">
+    <value>set the content compare type.</value>
+  </data>
   <data name="StringCMDBuildOptionLocaleDescription" xml:space="preserve">
     <value>select locale. eg: "zh-cn". use the system culture info default.</value>
   </data>

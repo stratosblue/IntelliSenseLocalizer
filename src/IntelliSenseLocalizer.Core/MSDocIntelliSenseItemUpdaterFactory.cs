@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace IntelliSenseLocalizer;
 
@@ -16,8 +14,8 @@ public class MSDocIntelliSenseItemUpdaterFactory : IIntelliSenseItemUpdaterFacto
         _loggerFactory = loggerFactory ?? throw new ArgumentNullException(nameof(loggerFactory));
     }
 
-    public IIntelliSenseItemUpdater GetUpdater(CultureInfo cultureInfo)
+    public IIntelliSenseItemUpdater GetUpdater(GenerateContext generateContext)
     {
-        return new MSDocIntelliSenseItemUpdater(cultureInfo, _loggerFactory.CreateLogger<MSDocIntelliSenseItemUpdater>());
+        return new MSDocIntelliSenseItemUpdater(generateContext, _loggerFactory.CreateLogger<MSDocIntelliSenseItemUpdater>());
     }
 }
