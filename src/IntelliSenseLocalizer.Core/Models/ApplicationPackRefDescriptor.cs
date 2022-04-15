@@ -10,9 +10,12 @@ public class ApplicationPackRefDescriptor
 
     public Version PackVersion { get; }
 
-    public ApplicationPackRefDescriptor(string packName, Version packVersion, string frameworkMoniker)
+    public string RootPath { get; }
+
+    public ApplicationPackRefDescriptor(string packName, Version packVersion, string frameworkMoniker, string rootPath)
     {
         FrameworkMoniker = frameworkMoniker;
+        RootPath = rootPath;
         PackName = packName;
         PackVersion = packVersion;
     }

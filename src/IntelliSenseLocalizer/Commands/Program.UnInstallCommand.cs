@@ -45,11 +45,13 @@ internal partial class Program
             Environment.Exit(1);
         }
 
-        var allLocalizedPack = DotNetEnvironmentUtil.GetLocalizedApplicationPacks(packRoot)
-                                                    .Where(m => string.Equals(m.Locale, locale, StringComparison.OrdinalIgnoreCase))
-                                                    .Select(m => m.Descriptor)
-                                                    .SelectMany(m => m.PackRefs)
-                                                    .Where(m => m.FrameworkMoniker == moniker);
+        var allPack = DotNetEnvironmentUtil.GetLocalizedApplicationPacks(packRoot)
+                                           .Where(m => string.Equals(m.Locale, locale, StringComparison.OrdinalIgnoreCase))
+                                           .Select(m => m.Descriptor)
+                                           .SelectMany(m => m.PackRefs)
+                                           .ToArray();
+
+        var allLocalizedPack = allPack.Where(m => m.FrameworkMoniker == moniker);
 
         var count = 0;
         try
@@ -67,5 +69,30 @@ internal partial class Program
             return;
         }
         Console.WriteLine($"UnInstall Done. {count} item deleted.");
+
+        try
+        {
+            foreach (var packRefRoot in allPack.Select(m => m.RootPath).Distinct())
+            {
+                DeleteEmptyDirectory(packRefRoot, 4);
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+        }
+
+        static void DeleteEmptyDirectory(string? path, int count)
+        {
+            if (count > 0
+                && !string.IsNullOrWhiteSpace(path)
+                && Directory.GetDirectories(path).Length == 0
+                && Directory.GetFiles(path).Length == 0)
+            {
+                Directory.Delete(path);
+
+                DeleteEmptyDirectory(Path.GetDirectoryName(path), count - 1);
+            }
+        }
     }
 }

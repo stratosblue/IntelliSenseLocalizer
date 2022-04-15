@@ -69,7 +69,7 @@ public static class DotNetEnvironmentUtil
                 {
                     var frameworkMoniker = Path.GetFileName(frameworkMonikerPath);
 
-                    var applicationPackRefDescriptor = new ApplicationPackRefDescriptor(appPackName, version, frameworkMoniker);
+                    var applicationPackRefDescriptor = new ApplicationPackRefDescriptor(appPackName, version, frameworkMoniker, frameworkMonikerPath);
 
                     applicationPackDescriptor.PackRefs.Add(applicationPackRefDescriptor);
 
@@ -121,7 +121,7 @@ public static class DotNetEnvironmentUtil
                         var applicationPackDescriptor = new ApplicationPackDescriptor(appPackName, appPackRefDirectory, version);
                         var frameworkMoniker = Path.GetFileName(frameworkMonikerPath);
 
-                        var applicationPackRefDescriptor = new ApplicationPackRefDescriptor(appPackName, version, frameworkMoniker);
+                        var applicationPackRefDescriptor = new ApplicationPackRefDescriptor(appPackName, version, frameworkMoniker, localizedPath);
 
                         applicationPackDescriptor.PackRefs.Add(applicationPackRefDescriptor);
 
