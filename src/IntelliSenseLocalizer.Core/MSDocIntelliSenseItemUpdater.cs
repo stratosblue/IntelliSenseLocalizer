@@ -19,11 +19,14 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
     private readonly IIntelliSenseItemWebPageDownloader _downloader;
     private readonly GenerateContext _generateContext;
     private readonly ILogger _logger;
+    private readonly string? _separateLine;
 
     public MSDocIntelliSenseItemUpdater(GenerateContext generateContext, ILogger logger)
     {
         _generateContext = generateContext ?? throw new ArgumentNullException(nameof(generateContext));
         _contentCompareType = generateContext.ContentCompareType;
+        _separateLine = generateContext.SeparateLine;
+
         _logger = logger ?? NullLogger.Instance;
         _downloader = new DefaultIntelliSenseItemWebPageDownloader(generateContext.CultureInfo, LocalizerEnvironment.CacheRoot);
     }
@@ -111,8 +114,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 
         if (_contentCompareType == ContentCompareType.OriginFirst)
         {
-            //添加一个分隔换行
-            element.AppendChild(element.CreateParaNode());
+            AppendSeparateLine();
         }
 
         XmlNode? appendLastNode = null;
@@ -123,7 +125,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
             if (element.ChildNodes[element.ChildNodes.Count - 1] is XmlElement lastElement
                 && string.Equals(lastElement.Name, "para", StringComparison.OrdinalIgnoreCase))
             {
-                appendLastNode = element.CreateParaNode(lastElement.Value);
+                appendLastNode = lastElement.CloneNode(true);
             }
 
             var itemClone = (XmlElement)element.CloneNode(true);
@@ -194,13 +196,27 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
             //本地化内容在前，把原内容添加到最后
             if (_contentCompareType == ContentCompareType.LocaleFirst)
             {
-                element.AppendChild(element.CreateParaNode());
+                AppendSeparateLine();
 
                 foreach (var item in originNodes)
                 {
                     element.AppendChild(item);
                 }
             }
+        }
+
+        //添加换行分割
+        void AppendSeparateLine()
+        {
+            element.AppendChild(element.CreateParaNode());
+            if (string.IsNullOrWhiteSpace(_separateLine))
+            {
+                return;
+            }
+
+            element.AppendChild(element.OwnerDocument.CreateTextNode(_separateLine));
+
+            element.AppendChild(element.CreateParaNode());
         }
     }
 

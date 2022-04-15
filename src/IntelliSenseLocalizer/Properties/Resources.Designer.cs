@@ -124,6 +124,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 the separate line between origin and locale content. (effective only use bilingual comparison) 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDBuildOptionSeparateLineDescription {
+            get {
+                return ResourceManager.GetString("StringCMDBuildOptionSeparateLineDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 select .net version. eg: &quot;6.0.3&quot;. process the lastest version default. 的本地化字符串。
         /// </summary>
         internal static string StringCMDBuildOptionVersionDescription {

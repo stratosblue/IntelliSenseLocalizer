@@ -34,7 +34,7 @@ internal partial class Program
             BuildClearCommand(),
         };
 
-        var customOption = new Option<string?>("--custom", () => null, "Custom addon options.");
+        var customOption = new Option<string?>("--custom", "Custom addon options.");
 
         rootCommand.AddGlobalOption(s_logLevelOption);
         rootCommand.AddGlobalOption(customOption);
@@ -43,7 +43,7 @@ internal partial class Program
 
         var optionParseResult = customOption.Parse(args);
 
-        // process like waitexit-20s
+        // process like delay-exit-20s
         if (optionParseResult.CommandResult.GetValueForOption(customOption) is string customOptionString
             && Regex.Match(customOptionString, @"delay-exit-(\d+)s") is Match waitSecondsMatch
             && waitSecondsMatch.Groups.Count > 1

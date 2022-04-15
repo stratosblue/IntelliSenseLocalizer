@@ -138,6 +138,9 @@
   <data name="StringCMDBuildOptionParallelCountDescription" xml:space="preserve">
     <value>设置并行处理数量，过大的值将导致微软很快会阻止你的IP访问。</value>
   </data>
+  <data name="StringCMDBuildOptionSeparateLineDescription" xml:space="preserve">
+    <value>原始内容和本地化内容的分割行。(仅在双语对照时有效)</value>
+  </data>
   <data name="StringCMDBuildOptionVersionDescription" xml:space="preserve">
     <value>指定.net版本。如 "6.0.3"。默认处理最新的版本。</value>
   </data>

@@ -63,9 +63,8 @@ internal partial class Program
         }
         catch (UnauthorizedAccessException ex)
         {
-            Console.WriteLine(ex.Message);
-            Console.WriteLine("Please run as administrator again.");
-            Environment.Exit(1);
+            RunAsAdminUtil.TryReRunAsAdmin(ex);
+            return;
         }
         Console.WriteLine($"UnInstall Done. {count} item deleted.");
     }

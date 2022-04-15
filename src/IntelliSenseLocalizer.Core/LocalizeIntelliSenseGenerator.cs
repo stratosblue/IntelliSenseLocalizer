@@ -16,9 +16,12 @@ public class GenerateContext
     public IntelliSenseFileDescriptor Descriptor { get; }
 
     public string OutputPath { get; }
+
     public int ParallelCount { get; set; } = 2;
 
-    public GenerateContext(IntelliSenseFileDescriptor descriptor, ContentCompareType contentCompareType, string outputPath, CultureInfo cultureInfo)
+    public string? SeparateLine { get; }
+
+    public GenerateContext(IntelliSenseFileDescriptor descriptor, ContentCompareType contentCompareType, string? separateLine, string outputPath, CultureInfo cultureInfo)
     {
         if (string.IsNullOrEmpty(outputPath))
         {
@@ -28,6 +31,7 @@ public class GenerateContext
         Descriptor = descriptor ?? throw new ArgumentNullException(nameof(descriptor));
         ContentCompareType = contentCompareType;
         OutputPath = outputPath;
+        SeparateLine = separateLine;
         CultureInfo = cultureInfo ?? throw new ArgumentNullException(nameof(cultureInfo));
     }
 }

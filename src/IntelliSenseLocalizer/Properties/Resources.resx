@@ -138,6 +138,9 @@
   <data name="StringCMDBuildOptionParallelCountDescription" xml:space="preserve">
     <value>set the parallel process count. large value wiil let MS block your ip fast.</value>
   </data>
+  <data name="StringCMDBuildOptionSeparateLineDescription" xml:space="preserve">
+    <value>the separate line between origin and locale content. (effective only use bilingual comparison)</value>
+  </data>
   <data name="StringCMDBuildOptionVersionDescription" xml:space="preserve">
     <value>select .net version. eg: "6.0.3". process the lastest version default.</value>
   </data>
