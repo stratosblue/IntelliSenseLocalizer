@@ -1,22 +1,9 @@
-﻿using HtmlAgilityPack;
-
-using IntelliSenseLocalizer;
+﻿using IntelliSenseLocalizer;
 
 namespace System.Xml;
 
 internal static class XmlElementExtensions
 {
-    public static XmlElement ImportAppendChild(this XmlElement element, XmlNode? node)
-    {
-        if (node is null)
-        {
-            return element;
-        }
-        var newNode = element.OwnerDocument.ImportNode(node, true);
-        element.AppendChild(newNode);
-        return element;
-    }
-
     public static XmlElement CreateParaNode(this XmlElement element, string? value = null)
     {
         var result = element.OwnerDocument.CreateElement("para");
@@ -84,5 +71,26 @@ internal static class XmlElementExtensions
     public static XmlNodeList GetTypeParamNodes(this XmlElement element)
     {
         return element.GetElementsByTagName("typeparam");
+    }
+
+    public static XmlElement ImportAppendChild(this XmlElement element, XmlNode? node)
+    {
+        if (node is null)
+        {
+            return element;
+        }
+        var newNode = element.OwnerDocument.ImportNode(node, true);
+        element.AppendChild(newNode);
+        return element;
+    }
+
+    public static List<XmlNode> ToList(this XmlNodeList xmlNodeList)
+    {
+        var result = new List<XmlNode>();
+        foreach (XmlNode item in xmlNodeList)
+        {
+            result.Add(item);
+        }
+        return result;
     }
 }

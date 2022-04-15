@@ -107,13 +107,19 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
     /// <param name="htmlNode"></param>
     protected virtual void UpdateElementContent(IntelliSenseItemDescriptor descriptor, XmlElement element, HtmlNode htmlNode)
     {
-        //TODO process different _contentCompareType
-        element.AppendChild(element.CreateParaNode());
+        var originNodes = element.ChildNodes.ToList();
+
+        if (_contentCompareType == ContentCompareType.OriginFirst)
+        {
+            //添加一个分隔换行
+            element.AppendChild(element.CreateParaNode());
+        }
 
         XmlNode? appendLastNode = null;
 
         if (element.ChildNodes.Count > 1)
         {
+            //原始数据最后为一个节点为换行节点
             if (element.ChildNodes[element.ChildNodes.Count - 1] is XmlElement lastElement
                 && string.Equals(lastElement.Name, "para", StringComparison.OrdinalIgnoreCase))
             {
@@ -141,17 +147,19 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                         ReplaceRefNodeContent(descriptor, refDictionary, linkHtmlNode, linkKey);
                     }
                 }
-                else
-                {
-                }
             }
         }
 
         var contentLines = WebUtility.HtmlDecode(htmlNode.InnerText.Trim()).Split('\n');
 
-        foreach (var contentLine in contentLines)
+        for (int contentIndex = 0; contentIndex < contentLines.Length; contentIndex++)
         {
-            element.AppendChild(element.CreateParaNode());
+            var contentLine = contentLines[contentIndex];
+
+            if (contentIndex > 0)
+            {
+                element.AppendChild(element.CreateParaNode());
+            }
 
             if (contentLine.Contains('<'))
             {
@@ -173,6 +181,26 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
         if (appendLastNode is not null)
         {
             element.AppendChild(appendLastNode);
+        }
+
+        //原内容在前，不需要更多处理
+        if (_contentCompareType != ContentCompareType.OriginFirst)
+        {
+            //移除原内容
+            foreach (var item in originNodes)
+            {
+                element.RemoveChild(item);
+            }
+            //本地化内容在前，把原内容添加到最后
+            if (_contentCompareType == ContentCompareType.LocaleFirst)
+            {
+                element.AppendChild(element.CreateParaNode());
+
+                foreach (var item in originNodes)
+                {
+                    element.AppendChild(item);
+                }
+            }
         }
     }
 
