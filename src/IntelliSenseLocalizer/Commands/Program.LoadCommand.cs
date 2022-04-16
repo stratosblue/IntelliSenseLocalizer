@@ -22,7 +22,9 @@ internal partial class Program
         {
             var githubLoadCommand = new Command("github", Resources.StringCMDLoadGithubDescription);
 
-            githubLoadCommand.SetHandler(LoadFromGithub);
+            githubLoadCommand.AddOption(targetOption);
+
+            githubLoadCommand.SetHandler<string>(LoadFromGithub, targetOption);
 
             loadCommand.AddCommand(githubLoadCommand);
         }
@@ -36,6 +38,18 @@ internal partial class Program
     }
 
     private static void Load(string source, string target)
+    {
+        if (source.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            LoadFromUrlAsync(source, target).Wait();
+        }
+        else
+        {
+            LoadFromFile(source, target);
+        }
+    }
+
+    private static void LoadFromFile(string source, string target)
     {
         if (!File.Exists(source))
         {
@@ -61,7 +75,7 @@ internal partial class Program
         LoadZipArchive(zipArchive, target);
     }
 
-    private static void LoadFromGithub()
+    private static void LoadFromGithub(string target)
     {
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks();
         var version = applicationPackDescriptors.Max(m => m.DotnetVersion)!.ToString(3);
@@ -74,21 +88,14 @@ internal partial class Program
         {
             try
             {
-                var assetsInfos = await FindAssetsAtReleases();
-                if (assetsInfos.FirstOrDefault(m => m.Name.Contains(version, StringComparison.OrdinalIgnoreCase) && m.Name.Contains(locale, StringComparison.OrdinalIgnoreCase)) is not AssetsInfo targetAssetsInfo)
+                var assetsInfos = await FindAssetsAtReleases(version);
+                if (assetsInfos.FirstOrDefault(m => m.Name.Contains(locale, StringComparison.OrdinalIgnoreCase)) is not AssetsInfo targetAssetsInfo)
                 {
                     Console.WriteLine($"Not found {version} - {locale} at github. Please build it yourself.");
                     Environment.Exit(1);
                     return;
                 }
-                Console.WriteLine($"Start download {targetAssetsInfo.DownloadUrl}");
-
-                //直接内存处理，不缓存了
-                var data = await targetAssetsInfo.DownloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).GetAsBytesAsync();
-
-                using var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
-
-                LoadZipArchive(zipArchive, LocalizerEnvironment.OutputRoot);
+                await LoadFromUrlAsync(targetAssetsInfo.DownloadUrl, target);
             }
             catch (Exception ex)
             {
@@ -97,7 +104,7 @@ internal partial class Program
             }
         }
 
-        static async Task<AssetsInfo[]> FindAssetsAtReleases()
+        static async Task<AssetsInfo[]> FindAssetsAtReleases(string version)
         {
             for (int pageIndex = 1; pageIndex < 10; pageIndex++)
             {
@@ -115,11 +122,24 @@ internal partial class Program
 
             return Array.Empty<AssetsInfo>();
 
-            static bool IsLocalizedIntelliSenseFilePacksRelease(System.Text.Json.JsonElement jsonElement)
+            bool IsLocalizedIntelliSenseFilePacksRelease(System.Text.Json.JsonElement jsonElement)
             {
-                return string.Equals(jsonElement.GetProperty("name").GetString(), LocalizedIntelliSenseFilePacksReleaseName, StringComparison.OrdinalIgnoreCase);
+                return string.Equals(jsonElement.GetProperty("name").GetString(), $"{LocalizedIntelliSenseFilePacksReleaseName}-{version}", StringComparison.OrdinalIgnoreCase);
             }
         }
+    }
+
+    private static async Task<ZipArchive> LoadFromUrlAsync(string downloadUrl, string target)
+    {
+        Console.WriteLine($"Start download {downloadUrl}");
+
+        //直接内存处理，不缓存了
+        var data = await downloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).GetAsBytesAsync();
+        var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
+
+        LoadZipArchive(zipArchive, target);
+
+        return zipArchive;
     }
 
     private static void LoadZipArchive(ZipArchive zipArchive, string target)
