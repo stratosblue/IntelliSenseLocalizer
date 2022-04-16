@@ -168,6 +168,9 @@
   <data name="StringCMDLoadDescription" xml:space="preserve">
     <value>加载本地化的智能感知文件压缩包。</value>
   </data>
+  <data name="StringCMDLoadGithubDescription" xml:space="preserve">
+    <value>从github加载本地化的智能感知文件压缩包(如果存在)。</value>
+  </data>
   <data name="StringCMDLoadOptionTargetDescription" xml:space="preserve">
     <value>解压文件压缩包的目标路径。</value>
   </data>

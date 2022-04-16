@@ -214,6 +214,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 load the localized intellisense file archive package from github (if existed). 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDLoadGithubDescription {
+            get {
+                return ResourceManager.GetString("StringCMDLoadGithubDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 archive package extract target path. 的本地化字符串。
         /// </summary>
         internal static string StringCMDLoadOptionTargetDescription {

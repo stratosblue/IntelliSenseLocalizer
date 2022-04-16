@@ -7,6 +7,7 @@
       //"commandLineArgs": "[debug] install"
       //"commandLineArgs": "[debug] uninstall net6.0 zh-cn"
       //"commandLineArgs": "[debug] load \".\\dotnet-intellisense-6.0-zh-cn.zip\""
+      //"commandLineArgs": "[debug] load github"
     }
   }
 }

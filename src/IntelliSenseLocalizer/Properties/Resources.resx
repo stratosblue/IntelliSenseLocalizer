@@ -168,6 +168,9 @@
   <data name="StringCMDLoadDescription" xml:space="preserve">
     <value>load the localized intellisense file archive package.</value>
   </data>
+  <data name="StringCMDLoadGithubDescription" xml:space="preserve">
+    <value>load the localized intellisense file archive package from github (if existed).</value>
+  </data>
   <data name="StringCMDLoadOptionTargetDescription" xml:space="preserve">
     <value>archive package extract target path.</value>
   </data>
