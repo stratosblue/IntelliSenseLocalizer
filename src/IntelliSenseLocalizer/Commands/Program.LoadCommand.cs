@@ -22,9 +22,12 @@ internal partial class Program
         {
             var githubLoadCommand = new Command("github", Resources.StringCMDLoadGithubDescription);
 
-            githubLoadCommand.AddOption(targetOption);
+            var contentCompareTypeOption = new Option<ContentCompareType>(new[] { "-cc", "--content-compare" }, () => ContentCompareType.None, Resources.StringCMDBuildOptionContentCompareDescription);
 
-            githubLoadCommand.SetHandler<string>(LoadFromGithub, targetOption);
+            githubLoadCommand.AddOption(targetOption);
+            githubLoadCommand.AddOption(contentCompareTypeOption);
+
+            githubLoadCommand.SetHandler<string, ContentCompareType>(LoadFromGithub, targetOption, contentCompareTypeOption);
 
             loadCommand.AddCommand(githubLoadCommand);
         }
@@ -75,12 +78,14 @@ internal partial class Program
         LoadZipArchive(zipArchive, target);
     }
 
-    private static void LoadFromGithub(string target)
+    private static void LoadFromGithub(string target, ContentCompareType contentCompareType)
     {
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks();
         var version = applicationPackDescriptors.Max(m => m.DotnetVersion)!.ToString(3);
         var locale = LocalizerEnvironment.CurrentLocale;
-        Console.WriteLine($"Trying load {version}@{locale} from github.");
+        var contentCompare = contentCompareType.ToString();
+
+        Console.WriteLine($"Trying load {version}@{locale} with ContentCompareType: {contentCompareType} from github.");
 
         LoadFromGithubAsync().Wait();
 
@@ -89,9 +94,9 @@ internal partial class Program
             try
             {
                 var assetsInfos = await FindAssetsAtReleases(version);
-                if (assetsInfos.FirstOrDefault(m => m.Name.Contains(locale, StringComparison.OrdinalIgnoreCase)) is not AssetsInfo targetAssetsInfo)
+                if (assetsInfos.FirstOrDefault(m => m.Name.Contains(locale, StringComparison.OrdinalIgnoreCase) && m.Name.Contains(contentCompare, StringComparison.OrdinalIgnoreCase)) is not AssetsInfo targetAssetsInfo)
                 {
-                    Console.WriteLine($"Not found {version} - {locale} at github. Please build it yourself.");
+                    Console.WriteLine($"Not found {version}@{locale} with ContentCompareType: {contentCompareType} at github. Please build it yourself.");
                     Environment.Exit(1);
                     return;
                 }
