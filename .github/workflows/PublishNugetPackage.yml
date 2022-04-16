@@ -18,7 +18,7 @@ jobs:
       with:
         dotnet-version: 6.0.x
     - name: build
-      run: ls && dotnet build -c Release
+      run: dotnet build -c Release
     - name: pack
       run: dotnet pack -c Release -o ./output
     - name: push package
