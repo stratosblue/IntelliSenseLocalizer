@@ -1,26 +1,34 @@
 ﻿using System.Globalization;
 
 using Cuture.Http;
+
 using IntelliSenseLocalizer.Models;
 
 namespace IntelliSenseLocalizer;
 
-public class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItemWebPageDownloader
+public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItemWebPageDownloader
 {
+    public const string NotFoundPageContent = "404NotFound";
     private readonly string _cacheRoot;
     private readonly string _locale;
-    public const string NotFoundPageContent = "404NotFound";
+    private readonly SemaphoreSlim _parallelSemaphore;
 
-    public DefaultIntelliSenseItemWebPageDownloader(CultureInfo cultureInfo, string cacheRoot)
+    public DefaultIntelliSenseItemWebPageDownloader(CultureInfo cultureInfo, string cacheRoot, int parallelCount)
     {
         _locale = cultureInfo.Name.ToLowerInvariant();
 
         _cacheRoot = cacheRoot;
+        _parallelSemaphore = new SemaphoreSlim(parallelCount, parallelCount);
 
         if (!Directory.Exists(cacheRoot))
         {
             Directory.CreateDirectory(cacheRoot);
         }
+    }
+
+    public void Dispose()
+    {
+        _parallelSemaphore.Dispose();
     }
 
     public async Task<string> DownloadAsync(IntelliSenseItemDescriptor memberDescriptor, bool ignoreCache, CancellationToken cancellationToken = default)
@@ -44,12 +52,23 @@ public class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItemWebPage
             return existedHtml;
         }
 
-        var response = await url.CreateHttpRequest()
+        HttpOperationResult<string> response;
+        await _parallelSemaphore.WaitAsync(cancellationToken);
+        try
+        {
+            response = await url.CreateHttpRequest()
                                 .UseUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.52")
                                 .UseSystemProxy()
                                 .AutoRedirection()
                                 .WithCancellation(cancellationToken)
                                 .TryGetAsStringAsync();
+        }
+        finally
+        {
+            _parallelSemaphore.Release();
+        }
+
+        using var disposable = response;
 
         if (response.Exception is not null)
         {

@@ -2,7 +2,7 @@
 
 namespace IntelliSenseLocalizer;
 
-public interface IIntelliSenseItemUpdater
+public interface IIntelliSenseItemUpdater : IDisposable
 {
     /// <summary>
     /// 更新<paramref name="intelliSenseItemGroup"/>中的所有项

@@ -20,6 +20,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
     private readonly GenerateContext _generateContext;
     private readonly ILogger _logger;
     private readonly string? _separateLine;
+    private bool _disposedValue;
 
     public MSDocIntelliSenseItemUpdater(GenerateContext generateContext, ILogger logger)
     {
@@ -28,7 +29,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
         _separateLine = generateContext.SeparateLine;
 
         _logger = logger ?? NullLogger.Instance;
-        _downloader = new DefaultIntelliSenseItemWebPageDownloader(generateContext.CultureInfo, LocalizerEnvironment.CacheRoot);
+        _downloader = new DefaultIntelliSenseItemWebPageDownloader(generateContext.CultureInfo, LocalizerEnvironment.CacheRoot, generateContext.ParallelCount);
     }
 
     public async Task UpdateAsync(IGrouping<string, IntelliSenseItemDescriptor> intelliSenseItemGroup, CancellationToken cancellationToken)
@@ -326,4 +327,28 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
     }
 
     #endregion Base
+
+    #region dispose
+
+    ~MSDocIntelliSenseItemUpdater()
+    {
+        Dispose(disposing: false);
+    }
+
+    public void Dispose()
+    {
+        Dispose(disposing: true);
+        GC.SuppressFinalize(this);
+    }
+
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!_disposedValue)
+        {
+            _disposedValue = true;
+            _downloader.Dispose();
+        }
+    }
+
+    #endregion dispose
 }

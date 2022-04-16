@@ -45,7 +45,7 @@ internal partial class Program
                                                        string? separateLine,
                                                        string outputRoot,
                                                        bool noCache,
-                                                       int parallelCout,
+                                                       int parallelCount,
                                                        int? logLevel)
     {
         locale = string.IsNullOrWhiteSpace(locale) ? LocalizerEnvironment.CurrentLocale : locale;
@@ -109,6 +109,8 @@ internal partial class Program
         {
             var generator = s_serviceProvider.GetRequiredService<LocalizeIntelliSenseGenerator>();
 
+            var parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = parallelCount };
+
             int packCount = 0;
             foreach (var packDescriptor in packDescriptors)
             {
@@ -118,28 +120,31 @@ internal partial class Program
                 foreach (var packRefDescriptor in packDescriptor.PackRefs)
                 {
                     packRefCount++;
-
+                    
                     int intelliSenseFileCount = 0;
-                    foreach (var intelliSenseFileDescriptor in packRefDescriptor.IntelliSenseFiles)
+                    await Parallel.ForEachAsync(packRefDescriptor.IntelliSenseFiles, parallelOptions, async (intelliSenseFileDescriptor, cancellationToken) =>
                     {
-                        intelliSenseFileCount++;
+                        var count = Interlocked.Increment(ref intelliSenseFileCount);
                         var outputPath = Path.Combine(outputRoot, packRefDescriptor.PackName, packRefDescriptor.PackVersion.ToString(3), "ref", packRefDescriptor.FrameworkMoniker, locale, intelliSenseFileDescriptor.FileName);
 
                         s_logger.LogInformation("Progress Pack[{packCount}/{packAll}]->PackRef[{packRefCount}/{packRefAll}]->File[{fileCount}/{fileAll}] - [{packName}:{version}:{name}]",
-                                                packCount,
-                                                packDescriptors.Length,
-                                                packRefCount,
-                                                packDescriptor.PackRefs.Count,
-                                                intelliSenseFileCount,
-                                                packRefDescriptor.IntelliSenseFiles.Count,
-                                                packRefDescriptor.PackName,
-                                                packRefDescriptor.PackVersion,
-                                                intelliSenseFileDescriptor.Name);
+                                               packCount,
+                                               packDescriptors.Length,
+                                               packRefCount,
+                                               packDescriptor.PackRefs.Count,
+                                               count,
+                                               packRefDescriptor.IntelliSenseFiles.Count,
+                                               packRefDescriptor.PackName,
+                                               packRefDescriptor.PackVersion,
+                                               intelliSenseFileDescriptor.Name);
 
-                        var context = new GenerateContext(intelliSenseFileDescriptor, contentCompareType, separateLine, outputPath, cultureInfo);
+                        var context = new GenerateContext(intelliSenseFileDescriptor, contentCompareType, separateLine, outputPath, cultureInfo)
+                        {
+                            ParallelCount = parallelCount
+                        };
 
                         await generator.GenerateAsync(context, default);
-                    }
+                    });
                 }
             }
         }

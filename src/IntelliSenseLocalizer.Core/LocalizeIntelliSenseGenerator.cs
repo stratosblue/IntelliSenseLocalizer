@@ -56,7 +56,7 @@ public class LocalizeIntelliSenseGenerator
         var xmlDocument = new XmlDocument();
         xmlDocument.Load(context.Descriptor.FilePath);
 
-        var intelliSenseItemUpdater = _intelliSenseItemUpdaterFactory.GetUpdater(context);
+        using var intelliSenseItemUpdater = _intelliSenseItemUpdaterFactory.GetUpdater(context);
 
         var intelliSenseItems = _intelliSenseItemProvider.GetItems(xmlDocument, context.Descriptor).ToList();
 
