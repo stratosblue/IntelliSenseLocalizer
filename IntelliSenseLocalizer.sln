@@ -13,7 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliSenseLocalizer.Core", "src\IntelliSenseLocalizer.Core\IntelliSenseLocalizer.Core.csproj", "{4EEED3D1-FFC1-4E05-93C2-FD2ABB4EBEE2}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliSenseLocalizer", "src\IntelliSenselocalizer\IntelliSenseLocalizer.csproj", "{1E815935-152F-48FB-BCC5-C99DD2A13D15}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliSenseLocalizer", "src\IntelliSenseLocalizer\IntelliSenseLocalizer.csproj", "{1E815935-152F-48FB-BCC5-C99DD2A13D15}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

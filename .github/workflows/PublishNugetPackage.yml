@@ -1,0 +1,27 @@
+name: Publish Nuget Package
+
+on:
+  push:
+    tags:        
+      - v*.*.**
+    branches: [ main ]
+
+jobs:
+  publish-with-build:
+
+    runs-on: ubuntu-latest
+        
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup .NET Core SDK
+      uses: actions/setup-dotnet@v1
+      with:
+        dotnet-version: 6.0.x
+    - name: build
+      run: ls && dotnet build -c Release
+    - name: pack
+      run: dotnet pack -c Release -o ./output
+    - name: push package
+      shell: pwsh
+      working-directory: ./output
+      run: Get-ChildItem -File -Filter '*.nupkg' | ForEach-Object { dotnet nuget push $_ -k ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json --no-service-endpoint --skip-duplicate; }

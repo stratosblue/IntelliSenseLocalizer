@@ -210,10 +210,10 @@
   <data name="StringRootCommandDescription" xml:space="preserve">
     <value>用于生成本地化智能感知文件的工具
 示例:
-展示Microsoft.NETCore.App的6.0.3版本中包含'threading'的xml文件:
-.\islocalizer show refs -p Microsoft.NETCore.App -v 6.0.3 -f threading
-构建Microsoft.AspNetCore.App的6.0.3的本地化智能感知文件:
-.\islocalizer build -p Microsoft.AspNetCore.App -v 6.0.3
+展示Microsoft.NETCore.App的6.0.4版本中包含'threading'的xml文件:
+.\islocalizer show refs -p Microsoft.NETCore.App -v 6.0.4 -f threading
+构建Microsoft.AspNetCore.App的6.0.4的本地化智能感知文件:
+.\islocalizer build -p Microsoft.AspNetCore.App -v 6.0.4
 安装已构建好的文件 (可能需要以管理员身份运行):
 .\islocalizer install
 清理构建的缓存:
