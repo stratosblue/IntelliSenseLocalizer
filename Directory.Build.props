@@ -9,7 +9,7 @@
 
   <!--Package Info-->
   <PropertyGroup>
-    <VersionPrefix>1.0.0-pre-4</VersionPrefix>
+    <VersionPrefix>1.0.0-pre-5</VersionPrefix>
 
     <Description>a tool for generate Localized IntelliSense files. 用于生成本地化IntelliSense文件的工具。</Description>
 
