@@ -15,6 +15,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliSenseLocalizer.Core"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IntelliSenseLocalizer", "src\IntelliSenseLocalizer\IntelliSenseLocalizer.csproj", "{1E815935-152F-48FB-BCC5-C99DD2A13D15}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{D946D58B-95D0-45AF-A517-9A0868BBC359}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{4975FE0D-664D-4BB3-88CD-34621534E302}"
+	ProjectSection(SolutionItems) = preProject
+		.github\workflows\PublishNugetPackage.yml = .github\workflows\PublishNugetPackage.yml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -36,6 +43,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{4EEED3D1-FFC1-4E05-93C2-FD2ABB4EBEE2} = {9F50AFEB-211C-41FD-9629-B218623F7B77}
 		{1E815935-152F-48FB-BCC5-C99DD2A13D15} = {9F50AFEB-211C-41FD-9629-B218623F7B77}
+		{4975FE0D-664D-4BB3-88CD-34621534E302} = {D946D58B-95D0-45AF-A517-9A0868BBC359}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {05AE6986-CEE4-46AD-8637-E3254F54CAD3}

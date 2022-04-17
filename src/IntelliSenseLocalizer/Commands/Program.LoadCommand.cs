@@ -1,10 +1,13 @@
 ﻿using System.CommandLine;
+using System.Globalization;
 using System.IO.Compression;
 using System.Text.RegularExpressions;
 
 using Cuture.Http;
 
 using IntelliSenseLocalizer.Properties;
+
+using Microsoft.Extensions.Logging;
 
 namespace IntelliSenseLocalizer;
 
@@ -23,11 +26,13 @@ internal partial class Program
             var githubLoadCommand = new Command("github", Resources.StringCMDLoadGithubDescription);
 
             var contentCompareTypeOption = new Option<ContentCompareType>(new[] { "-cc", "--content-compare" }, () => ContentCompareType.None, Resources.StringCMDBuildOptionContentCompareDescription);
+            var localeOption = new Option<string>(new[] { "-l", "--locale" }, () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDBuildOptionLocaleDescription);
 
             githubLoadCommand.AddOption(targetOption);
+            githubLoadCommand.AddOption(localeOption);
             githubLoadCommand.AddOption(contentCompareTypeOption);
 
-            githubLoadCommand.SetHandler<string, ContentCompareType>(LoadFromGithub, targetOption, contentCompareTypeOption);
+            githubLoadCommand.SetHandler<string, string, ContentCompareType>(LoadFromGithub, targetOption, localeOption, contentCompareTypeOption);
 
             loadCommand.AddCommand(githubLoadCommand);
         }
@@ -78,11 +83,23 @@ internal partial class Program
         LoadZipArchive(zipArchive, target);
     }
 
-    private static void LoadFromGithub(string target, ContentCompareType contentCompareType)
+    private static void LoadFromGithub(string target, string locale, ContentCompareType contentCompareType)
     {
+        locale = string.IsNullOrWhiteSpace(locale) ? LocalizerEnvironment.CurrentLocale : locale;
+        CultureInfo cultureInfo;
+        try
+        {
+            cultureInfo = CultureInfo.GetCultureInfo(locale);
+        }
+        catch
+        {
+            s_logger.LogCritical("\"{locale}\" is not a effective locale.", locale);
+            Environment.Exit(1);
+            throw;
+        }
+
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks();
         var version = applicationPackDescriptors.Max(m => m.DotnetVersion)!.ToString(3);
-        var locale = LocalizerEnvironment.CurrentLocale;
         var contentCompare = contentCompareType.ToString();
 
         Console.WriteLine($"Trying load {version}@{locale} with ContentCompareType: {contentCompareType} from github.");
@@ -106,6 +123,7 @@ internal partial class Program
             {
                 Console.WriteLine($"Load from github fail. {ex.Message}.");
                 Environment.Exit(1);
+                throw;
             }
         }
 

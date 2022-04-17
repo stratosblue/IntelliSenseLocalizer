@@ -21,6 +21,30 @@ internal partial class Program
 
         installCommand.SetHandler<string, string, string, string>(Install, sourceOption, targetOption, versionOption, localeOption);
 
+        {
+            var autoInstallCommand = new Command("auto", Resources.StringCMDInstallAutoInstallDescription);
+
+            autoInstallCommand.SetHandler(() =>
+            {
+                var writeTestPath = Path.Combine(LocalizerEnvironment.DefaultSdkRoot, ".write_test");
+                try
+                {
+                    File.WriteAllText(writeTestPath, "write_test");
+                    File.Delete(writeTestPath);
+                }
+                catch (UnauthorizedAccessException ex)
+                {
+                    RunAsAdminUtil.TryReRunAsAdmin(ex);
+                    return;
+                }
+                
+                LoadFromGithub(LocalizerEnvironment.OutputRoot, LocalizerEnvironment.CurrentLocale, ContentCompareType.Default);
+                Install(LocalizerEnvironment.OutputRoot, LocalizerEnvironment.DefaultSdkRoot, string.Empty, LocalizerEnvironment.CurrentLocale);
+            });
+
+            installCommand.Add(autoInstallCommand);
+        }
+
         return installCommand;
     }
 

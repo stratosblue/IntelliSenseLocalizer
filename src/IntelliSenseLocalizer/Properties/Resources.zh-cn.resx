@@ -147,6 +147,9 @@
   <data name="StringCMDClearDescription" xml:space="preserve">
     <value>清理下载或缓存文件。</value>
   </data>
+  <data name="StringCMDInstallAutoInstallDescription" xml:space="preserve">
+    <value>使用当前区域从github自动加载本地化的intellisense文件包（如果存在）并安装它。</value>
+  </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>安装本地化的智能感知文件。（从源文件夹.xml文件到目标SDK包目录）</value>
   </data>

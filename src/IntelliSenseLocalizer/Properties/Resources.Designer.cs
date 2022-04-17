@@ -151,6 +151,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 automatically load and install the localized IntelliSense archive from GitHub (if existed) using the current locale. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDInstallAutoInstallDescription {
+            get {
+                return ResourceManager.GetString("StringCMDInstallAutoInstallDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 install the localized intellisense file. (copy all .xml file from source directory to target SDK pack directory) 的本地化字符串。
         /// </summary>
         internal static string StringCMDInstallDescription {

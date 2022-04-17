@@ -147,6 +147,9 @@
   <data name="StringCMDClearDescription" xml:space="preserve">
     <value>clear the download or cache files.</value>
   </data>
+  <data name="StringCMDInstallAutoInstallDescription" xml:space="preserve">
+    <value>automatically load and install the localized IntelliSense archive from GitHub (if existed) using the current locale.</value>
+  </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>install the localized intellisense file. (copy all .xml file from source directory to target SDK pack directory)</value>
   </data>
