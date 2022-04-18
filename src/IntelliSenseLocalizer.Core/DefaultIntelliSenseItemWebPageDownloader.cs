@@ -35,8 +35,8 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
     {
         var queryKey = memberDescriptor.GetMicrosoftDocsQueryKey();
         var intelliSenseFile = memberDescriptor.IntelliSenseFileDescriptor;
-        var frameworkMoniker = intelliSenseFile.OwnerPack.FrameworkMoniker;
-        var cacheDriectory = Path.Combine(_cacheRoot, intelliSenseFile.OwnerPack.PackName, frameworkMoniker, _locale);
+        var frameworkMoniker = intelliSenseFile.OwnerPackRef.OwnerMoniker.Moniker;
+        var cacheDriectory = Path.Combine(_cacheRoot, intelliSenseFile.OwnerPackRef.OwnerMoniker.OwnerVersion.OwnerPack.Name, frameworkMoniker, _locale);
         var cacheFilePath = Path.Combine(cacheDriectory, $"{queryKey}.html");
 
         var url = $"https://docs.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={frameworkMoniker}";

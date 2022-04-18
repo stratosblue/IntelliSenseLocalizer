@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Globalization;
 
 using IntelliSenseLocalizer.Properties;
 
@@ -54,23 +55,28 @@ internal partial class Program
             Console.WriteLine("input version value is error format.");
             Environment.Exit(1);
         }
-        
-        if (!packName.EndsWith(".Ref", StringComparison.OrdinalIgnoreCase))
-        {
-            packName = $"{packName}.Ref";
-        }
 
-        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks();
+        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();
 
-        var query = applicationPackDescriptors.Where(m => string.IsNullOrEmpty(packName) || string.Equals(m.Name, packName, StringComparison.OrdinalIgnoreCase))
-                                              .Where(m => version is null || m.DotnetVersion.Equals(version))
-                                              .SelectMany(m => m.PackRefs)
+        var query = applicationPackDescriptors.Where(m => packNameFilterFunc(m.Name))
+                                              .SelectMany(m => m.Versions)
+                                              .Where(m => version is null || m.Version.Equals(version))
+                                              .SelectMany(m => m.Monikers)
+                                              .SelectMany(m => m.Refs)
                                               .SelectMany(m => m.IntelliSenseFiles)
-                                              .Where(m => filterFunc(m.Name));
+                                              .Where(m => filterFunc(m.Name))
+                                              .OrderBy(m => m.Name);
 
         foreach (var intelliSenseFileDescriptor in query)
         {
-            Console.WriteLine($"[{intelliSenseFileDescriptor.Name}] at [{intelliSenseFileDescriptor.FilePath}]");
+            if (intelliSenseFileDescriptor.OwnerPackRef.Culture is CultureInfo culture)
+            {
+                Console.WriteLine($"[{intelliSenseFileDescriptor.Name}]({culture}) at [{intelliSenseFileDescriptor.FilePath}]");
+            }
+            else
+            {
+                Console.WriteLine($"[{intelliSenseFileDescriptor.Name}] at [{intelliSenseFileDescriptor.FilePath}]");
+            }
         }
     }
 
@@ -78,7 +84,7 @@ internal partial class Program
     {
         var filterFunc = BuildStringFilterFunc(filterString);
 
-        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks().ToArray();
+        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks().ToArray();
         foreach (var packDescriptor in applicationPackDescriptors.Where(m => filterFunc(m.Name)))
         {
             Console.WriteLine(packDescriptor);

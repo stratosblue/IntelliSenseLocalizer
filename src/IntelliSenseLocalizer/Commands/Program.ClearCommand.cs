@@ -29,6 +29,7 @@ internal partial class Program
                     Directory.Delete(LocalizerEnvironment.CacheRoot, true);
                     Directory.Delete(LocalizerEnvironment.LogRoot, true);
                     Directory.Delete(LocalizerEnvironment.OutputRoot, true);
+                    Directory.Delete(LocalizerEnvironment.BuildRoot, true);
                     break;
 
                 case ClearType.Cache:
@@ -41,6 +42,10 @@ internal partial class Program
 
                 case ClearType.Logs:
                     Directory.Delete(LocalizerEnvironment.LogRoot, true);
+                    break;
+
+                case ClearType.Build:
+                    Directory.Delete(LocalizerEnvironment.BuildRoot, true);
                     break;
             }
             Console.WriteLine($"[{type}] Cleared.");
@@ -57,5 +62,6 @@ internal partial class Program
         Cache = 1 << 1,
         Output = 1 << 2,
         Logs = 1 << 3,
+        Build = 1 << 4,
     }
 }

@@ -53,11 +53,17 @@ internal partial class Program
         }
         else
         {
-            LoadFromFile(source, target);
+            if (!TryGetLocaleAndContentCompareTypeFromName(source, out var locale, out var contentCompareType))
+            {
+                Console.WriteLine("The file name must be locale@ContentCompareType like zh-cn@LocaleFirst.");
+                Environment.Exit(1);
+                return;
+            }
+            LoadFromFile(locale, contentCompareType, source, target);
         }
     }
 
-    private static void LoadFromFile(string source, string target)
+    private static void LoadFromFile(string locale, ContentCompareType contentCompareType, string source, string target)
     {
         if (!File.Exists(source))
         {
@@ -80,7 +86,7 @@ internal partial class Program
             return;
         }
 
-        LoadZipArchive(zipArchive, target);
+        LoadZipArchive(locale, contentCompareType, zipArchive, target);
     }
 
     private static void LoadFromGithub(string target, string locale, ContentCompareType contentCompareType)
@@ -98,8 +104,8 @@ internal partial class Program
             throw;
         }
 
-        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks();
-        var version = applicationPackDescriptors.Max(m => m.DotnetVersion)!.ToString(3);
+        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();
+        var version = applicationPackDescriptors.SelectMany(m => m.Versions).Max(m => m.Version)!.ToString(3);
         var contentCompare = contentCompareType.ToString();
 
         Console.WriteLine($"Trying load {version}@{locale} with ContentCompareType: {contentCompareType} from github.");
@@ -152,23 +158,41 @@ internal partial class Program
         }
     }
 
-    private static async Task<ZipArchive> LoadFromUrlAsync(string downloadUrl, string target)
+    private static async Task LoadFromUrlAsync(string downloadUrl, string target)
     {
         Console.WriteLine($"Start download {downloadUrl}");
 
         //直接内存处理，不缓存了
-        var data = await downloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).GetAsBytesAsync();
-        var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
+        using var httpOperationResult = await downloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).TryGetAsBytesAsync();
 
-        LoadZipArchive(zipArchive, target);
+        if (httpOperationResult.Exception is not null)
+        {
+            throw httpOperationResult.Exception;
+        }
 
-        return zipArchive;
+        var contentDisposition = httpOperationResult.ResponseMessage!.Headers.GetValues("Content-Disposition").FirstOrDefault() ?? string.Empty;
+
+        if (Regex.Match(contentDisposition, @"filename=(.+?)\.zip") is not Match match
+            || match.Groups.Count < 2
+            || !TryGetLocaleAndContentCompareTypeFromName(match.Groups[1].Value, out var locale, out var contentCompareType))
+        {
+            Console.WriteLine("can not get file name from response.");
+            Environment.Exit(1);
+            return;
+        }
+
+        var data = httpOperationResult.Data!;
+        using var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
+
+        LoadZipArchive(locale, contentCompareType, zipArchive, target);
     }
 
-    private static void LoadZipArchive(ZipArchive zipArchive, string target)
+    private static void LoadZipArchive(string locale, ContentCompareType contentCompareType, ZipArchive zipArchive, string target)
     {
         //文件路径正则判断，形如 *.App.Ref/6.0.3/ref/net6.0/zh-cn/*.xml
         var entryNameRegex = new Regex(@".+?\.App\.Ref[\/]\d+\.\d+\.\d+[\/]ref[\/]net\d+.*[\/][a-z]+-[a-z-]+[\/].+.xml$");
+
+        target = Path.Combine(target, $"{locale}@{contentCompareType}");
 
         try
         {
@@ -193,6 +217,37 @@ internal partial class Program
         {
             zipArchive.Dispose();
         }
+    }
+
+    /// <summary>
+    /// 必须为 zh-cn@LocaleFirst 这种格式
+    /// </summary>
+    /// <param name="name"></param>
+    /// <param name="locale"></param>
+    /// <param name="contentCompareType"></param>
+    /// <returns></returns>
+    private static bool TryGetLocaleAndContentCompareTypeFromName(string name, out string locale, out ContentCompareType contentCompareType)
+    {
+        name = Path.GetFileNameWithoutExtension(name);
+        var seg = name.Split('@');
+        locale = string.Empty;
+        contentCompareType = ContentCompareType.Default;
+        if (seg.Length != 2)
+        {
+            return false;
+        }
+
+        try
+        {
+            CultureInfo.GetCultureInfo(seg[0]);
+            locale = seg[0];
+        }
+        catch
+        {
+            return false;
+        }
+
+        return Enum.TryParse(seg[1], out contentCompareType);
     }
 
     private record AssetsInfo(string Name, string DownloadUrl);

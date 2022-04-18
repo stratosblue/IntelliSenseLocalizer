@@ -27,9 +27,10 @@ internal partial class Program
 
     private static void UnInstall(string moniker, string locale, string target)
     {
+        CultureInfo culture;
         try
         {
-            CultureInfo.GetCultureInfo(locale);
+            culture = CultureInfo.GetCultureInfo(locale);
         }
         catch
         {
@@ -45,18 +46,18 @@ internal partial class Program
             Environment.Exit(1);
         }
 
-        var allPack = DotNetEnvironmentUtil.GetLocalizedApplicationPacks(packRoot)
-                                           .Where(m => string.Equals(m.Locale, locale, StringComparison.OrdinalIgnoreCase))
-                                           .Select(m => m.Descriptor)
-                                           .SelectMany(m => m.PackRefs)
+        var allPack = DotNetEnvironmentUtil.GetAllApplicationPacks(packRoot)
+                                           .SelectMany(m => m.Versions)
+                                           .SelectMany(m => m.Monikers)
+                                           .Where(m => string.Equals(m.Moniker, moniker, StringComparison.OrdinalIgnoreCase))
+                                           .SelectMany(m => m.Refs)
+                                           .Where(m => m.Culture == culture)
                                            .ToArray();
-
-        var allLocalizedPack = allPack.Where(m => m.FrameworkMoniker == moniker);
 
         var count = 0;
         try
         {
-            foreach (var item in allLocalizedPack.SelectMany(m => m.IntelliSenseFiles))
+            foreach (var item in allPack.SelectMany(m => m.IntelliSenseFiles))
             {
                 File.Delete(item.FilePath);
                 Console.WriteLine(item.FilePath);

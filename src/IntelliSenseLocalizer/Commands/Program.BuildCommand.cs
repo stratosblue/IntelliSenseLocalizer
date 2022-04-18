@@ -1,5 +1,6 @@
 ﻿using System.CommandLine;
 using System.Globalization;
+using System.IO.Compression;
 
 using IntelliSenseLocalizer.Properties;
 
@@ -78,11 +79,11 @@ internal partial class Program
 
         var packNameFilterFunc = BuildStringFilterFunc(packName);
 
-        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllInstalledApplicationPacks();
+        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();
 
         if (version is null)
         {
-            version = applicationPackDescriptors.Max(m => m.DotnetVersion);
+            version = applicationPackDescriptors.SelectMany(m => m.Versions).Max(m => m.Version);
         }
 
         if (version is null || version.Major < 6)
@@ -91,11 +92,15 @@ internal partial class Program
             Environment.Exit(1);
         }
 
-        var packDescriptors = applicationPackDescriptors.Where(m => string.IsNullOrEmpty(packName) || string.Equals(m.Name, packName, StringComparison.OrdinalIgnoreCase))
-                                                        .Where(m => m.DotnetVersion.Equals(version) && packNameFilterFunc(m.Name))
-                                                        .ToArray();
+        var refDescriptors = applicationPackDescriptors.Where(m => string.IsNullOrEmpty(packName) || string.Equals(m.Name, packName, StringComparison.OrdinalIgnoreCase))
+                                                       .SelectMany(m => m.Versions)
+                                                       .Where(m => m.Version.Equals(version))
+                                                       .SelectMany(m => m.Monikers)
+                                                       .SelectMany(m => m.Refs)
+                                                       .Where(m => m.Culture is null)
+                                                       .ToArray();
 
-        if (!packDescriptors.Any())
+        if (!refDescriptors.Any())
         {
             s_logger.LogCritical("Not found localizeable files.");
             Environment.Exit(1);
@@ -111,41 +116,59 @@ internal partial class Program
 
             var parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = parallelCount };
 
-            int packCount = 0;
-            foreach (var packDescriptor in packDescriptors)
+            //处理文件
+            int refCount = 0;
+            foreach (var refDescriptor in refDescriptors)
             {
-                packCount++;
+                refCount++;
+                var applicationPackRefMoniker = refDescriptor.OwnerMoniker;
+                var moniker = applicationPackRefMoniker.Moniker;
 
-                int packRefCount = 0;
-                foreach (var packRefDescriptor in packDescriptor.PackRefs)
+                int intelliSenseFileCount = 0;
+                await Parallel.ForEachAsync(refDescriptor.IntelliSenseFiles, parallelOptions, async (intelliSenseFileDescriptor, cancellationToken) =>
                 {
-                    packRefCount++;
-                    
-                    int intelliSenseFileCount = 0;
-                    await Parallel.ForEachAsync(packRefDescriptor.IntelliSenseFiles, parallelOptions, async (intelliSenseFileDescriptor, cancellationToken) =>
+                    var count = Interlocked.Increment(ref intelliSenseFileCount);
+
+                    var applicationPackVersion = applicationPackRefMoniker.OwnerVersion;
+                    var applicationPack = applicationPackVersion.OwnerPack;
+
+                    var buildPath = Path.Combine(LocalizerEnvironment.BuildRoot, $"{moniker}@{locale}@{contentCompareType}", applicationPack.Name, intelliSenseFileDescriptor.FileName);
+
+                    s_logger.LogInformation("Progress PackRef[{packRefCount}/{packRefAll}]->File[{fileCount}/{fileAll}] - [{packName}:{version}:{name}]",
+                                            refCount,
+                                            refDescriptors.Length,
+                                            count,
+                                            refDescriptor.IntelliSenseFiles.Count,
+                                            applicationPack.Name,
+                                            refDescriptor.OwnerMoniker.OwnerVersion.Version,
+                                            intelliSenseFileDescriptor.Name);
+
+                    var context = new GenerateContext(intelliSenseFileDescriptor, contentCompareType, separateLine, buildPath, cultureInfo)
                     {
-                        var count = Interlocked.Increment(ref intelliSenseFileCount);
-                        var outputPath = Path.Combine(outputRoot, packRefDescriptor.PackName, packRefDescriptor.PackVersion.ToString(3), "ref", packRefDescriptor.FrameworkMoniker, locale, intelliSenseFileDescriptor.FileName);
+                        ParallelCount = parallelCount
+                    };
 
-                        s_logger.LogInformation("Progress Pack[{packCount}/{packAll}]->PackRef[{packRefCount}/{packRefAll}]->File[{fileCount}/{fileAll}] - [{packName}:{version}:{name}]",
-                                               packCount,
-                                               packDescriptors.Length,
-                                               packRefCount,
-                                               packDescriptor.PackRefs.Count,
-                                               count,
-                                               packRefDescriptor.IntelliSenseFiles.Count,
-                                               packRefDescriptor.PackName,
-                                               packRefDescriptor.PackVersion,
-                                               intelliSenseFileDescriptor.Name);
+                    await generator.GenerateAsync(context, default);
+                });
+            }
 
-                        var context = new GenerateContext(intelliSenseFileDescriptor, contentCompareType, separateLine, outputPath, cultureInfo)
-                        {
-                            ParallelCount = parallelCount
-                        };
-
-                        await generator.GenerateAsync(context, default);
-                    });
+            //创建压缩文件
+            var outputPackNames = refDescriptors.Select(m => $"{m.OwnerMoniker.Moniker}@{locale}@{contentCompareType}").ToHashSet();
+            foreach (var outputPackName in outputPackNames)
+            {
+                var rootPath = Path.Combine(LocalizerEnvironment.BuildRoot, outputPackName);
+                var tmpZipFileName = Path.Combine(rootPath, $"{Guid.NewGuid():n}.zip");
+                using var fileStream = File.Open(tmpZipFileName, FileMode.Create, FileAccess.ReadWrite);
+                using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
+                foreach (var file in Directory.EnumerateFiles(rootPath, "*.xml", SearchOption.AllDirectories))
+                {
+                    var entryName = file.Replace(rootPath, string.Empty);
+                    zipArchive.CreateEntryFromFile(file, entryName);
                 }
+
+                zipArchive.Dispose();
+                fileStream.Dispose();
+                File.Move(tmpZipFileName, Path.Combine(rootPath, $"{outputPackName}.zip"), true);
             }
         }
     }
