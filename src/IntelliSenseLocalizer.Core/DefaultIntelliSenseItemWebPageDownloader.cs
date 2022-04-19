@@ -42,7 +42,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
             && File.Exists(cacheFilePath))
         {
             var existedHtml = await File.ReadAllTextAsync(cacheFilePath, cancellationToken);
-            if (string.Equals(existedHtml, NotFoundPageContent, StringComparison.OrdinalIgnoreCase))
+            if (existedHtml.EqualsOrdinalIgnoreCase(NotFoundPageContent))
             {
                 throw NotFoundException();
             }

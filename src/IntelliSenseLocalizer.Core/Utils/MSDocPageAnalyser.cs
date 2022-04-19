@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+
 using IntelliSenseLocalizer.Models;
 
 namespace IntelliSenseLocalizer;
@@ -8,93 +9,6 @@ namespace IntelliSenseLocalizer;
 /// </summary>
 public static class MSDocPageAnalyser
 {
-    private static MSDocPageAnalysisResult CreatePageAnalysisResult(string uniqueKey, HtmlNode htmlNode)
-    {
-        var summaryHolderNode = htmlNode.SelectSingleNode("./div[@class=\"summaryHolder\"]");
-
-        var fields = GetFields(htmlNode);
-
-        var parameterNodes = htmlNode.SelectNodes(".//dl[@class=\"parameterList\"]");
-
-        Dictionary<string, HtmlNode> parameters = new();
-
-        if (parameterNodes is not null)
-        {
-            foreach (var item in parameterNodes)
-            {
-                if (item.NextSibling.NextSibling is HtmlNode { Name: "p" } descNode)
-                {
-                    var parameterName = item.SelectSingleNode("./dt").InnerText.Trim();
-                    parameters.Add(parameterName, descNode);
-                }
-            }
-        }
-
-        var returnPropertyInfoNode = htmlNode.SelectSingleNode("./dl[@class=\"propertyInfo\"]");
-        var returnNode = returnPropertyInfoNode?.NextSibling?.NextSibling is HtmlNode tReturnNode
-                         && string.Equals(tReturnNode.Name, "p", StringComparison.OrdinalIgnoreCase)
-                            ? tReturnNode
-                            : null;
-
-        return new MSDocPageAnalysisResult(uniqueKey, parameters, fields)
-        {
-            SummaryNode = summaryHolderNode,
-            ReturnNode = returnNode,
-        };
-    }
-
-    private static Dictionary<string, HtmlNode> GetFields(HtmlNode htmlNode)
-    {
-        var tableNodes = htmlNode.SelectNodes("./table[contains(@class,'nameValue')]");
-
-        Dictionary<string, HtmlNode> fields = new();
-
-        HtmlNode? fieldsTableNodes = null;
-
-        if (tableNodes is not null)
-        {
-            foreach (var tableNode in tableNodes)
-            {
-                if (tableNode is not null
-                    && tableNode.GetPreTagNode("h2") is HtmlNode h2Node
-                    && (string.Equals(h2Node.Id, "", StringComparison.Ordinal) || string.Equals(h2Node.Id, "fields", StringComparison.OrdinalIgnoreCase)))
-                {
-                    var trs = tableNode.SelectNodes(".//tr");
-                    foreach (var tr in trs)
-                    {
-                        var tds = tr.ChildNodes.Where(m => m.Name == "td").ToArray();
-                        var key = tds.First().Id;
-
-                        if (string.IsNullOrWhiteSpace(key))
-                        {
-                            var href = tds.First().SelectSingleNode(".//a")?.GetAttributeValue("href", "") ?? string.Empty;
-                            key = IntelliSenseNameUtil.GetNameInLink(href);
-                        }
-
-                        if (string.IsNullOrWhiteSpace(key))
-                        {
-                            throw new Exception("字段key找不到");
-                        }
-                        key = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(key);
-                        fields.Add(key, tds.Last());
-                    }
-                }
-            }
-        }
-
-        if (fieldsTableNodes is not null)
-        {
-            var trs = fieldsTableNodes.SelectNodes(".//tr");
-            foreach (var tr in trs)
-            {
-                var tds = tr.ChildNodes.Where(m => m.Name == "td").ToArray();
-                fields.Add(tds.First().Id, tds.Last());
-            }
-        }
-
-        return fields;
-    }
-
     /// <summary>
     /// 分析页面文档并提供分析结果
     /// </summary>
@@ -135,7 +49,7 @@ public static class MSDocPageAnalyser
                 var uniqueKey = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(memberNameHolderNode.SelectSingleNode("./h2").Id);
 
                 if (memberNameHolderNode.GetNextTagNode("div") is HtmlNode memberInfoNode
-                    && string.Equals(memberInfoNode.GetAttributeValue("class", string.Empty), "memberInfo", StringComparison.OrdinalIgnoreCase))
+                    && memberInfoNode.GetAttributeValue("class", string.Empty).EqualsOrdinalIgnoreCase("memberInfo"))
                 {
                     result[i] = CreatePageAnalysisResult(uniqueKey, memberInfoNode);
                 }
@@ -143,5 +57,92 @@ public static class MSDocPageAnalyser
 
             return result;
         }
+    }
+
+    private static MSDocPageAnalysisResult CreatePageAnalysisResult(string uniqueKey, HtmlNode htmlNode)
+    {
+        var summaryHolderNode = htmlNode.SelectSingleNode("./div[@class=\"summaryHolder\"]");
+
+        var fields = GetFields(htmlNode);
+
+        var parameterNodes = htmlNode.SelectNodes(".//dl[@class=\"parameterList\"]");
+
+        Dictionary<string, HtmlNode> parameters = new();
+
+        if (parameterNodes is not null)
+        {
+            foreach (var item in parameterNodes)
+            {
+                if (item.NextSibling.NextSibling is HtmlNode { Name: "p" } descNode)
+                {
+                    var parameterName = item.SelectSingleNode("./dt").InnerText.Trim();
+                    parameters.Add(parameterName, descNode);
+                }
+            }
+        }
+
+        var returnPropertyInfoNode = htmlNode.SelectSingleNode("./dl[@class=\"propertyInfo\"]");
+        var returnNode = returnPropertyInfoNode?.NextSibling?.NextSibling is HtmlNode tReturnNode
+                         && tReturnNode.Name.EqualsOrdinalIgnoreCase("p")
+                            ? tReturnNode
+                            : null;
+
+        return new MSDocPageAnalysisResult(uniqueKey, parameters, fields)
+        {
+            SummaryNode = summaryHolderNode,
+            ReturnNode = returnNode,
+        };
+    }
+
+    private static Dictionary<string, HtmlNode> GetFields(HtmlNode htmlNode)
+    {
+        var tableNodes = htmlNode.SelectNodes("./table[contains(@class,'nameValue')]");
+
+        Dictionary<string, HtmlNode> fields = new();
+
+        HtmlNode? fieldsTableNodes = null;
+
+        if (tableNodes is not null)
+        {
+            foreach (var tableNode in tableNodes)
+            {
+                if (tableNode is not null
+                    && tableNode.GetPreTagNode("h2") is HtmlNode h2Node
+                    && (h2Node.Id.EqualsOrdinal("") || h2Node.Id.EqualsOrdinalIgnoreCase("fields")))
+                {
+                    var trs = tableNode.SelectNodes(".//tr");
+                    foreach (var tr in trs)
+                    {
+                        var tds = tr.ChildNodes.Where(m => m.Name == "td").ToArray();
+                        var key = tds.First().Id;
+
+                        if (string.IsNullOrWhiteSpace(key))
+                        {
+                            var href = tds.First().SelectSingleNode(".//a")?.GetAttributeValue("href", "") ?? string.Empty;
+                            key = IntelliSenseNameUtil.GetNameInLink(href);
+                        }
+
+                        if (string.IsNullOrWhiteSpace(key))
+                        {
+                            throw new Exception("字段key找不到");
+                        }
+                        key = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(key);
+                        fields.Add(key, tds.Last());
+                    }
+                }
+            }
+        }
+
+        if (fieldsTableNodes is not null)
+        {
+            var trs = fieldsTableNodes.SelectNodes(".//tr");
+            foreach (var tr in trs)
+            {
+                var tds = tr.ChildNodes.Where(m => m.Name == "td").ToArray();
+                fields.Add(tds.First().Id, tds.Last());
+            }
+        }
+
+        return fields;
     }
 }

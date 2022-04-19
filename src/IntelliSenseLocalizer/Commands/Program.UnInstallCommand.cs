@@ -42,14 +42,13 @@ internal partial class Program
         var packRoot = DotNetEnvironmentUtil.GetSDKPackRoot(target);
         if (!Directory.Exists(packRoot))
         {
-            Console.WriteLine($"not found any pack at the target SDK folder {target}. please check input.");
-            Environment.Exit(1);
+            WriteMessageAndExit($"not found any pack at the target SDK folder {target}. please check input.");
         }
 
         var allPack = DotNetEnvironmentUtil.GetAllApplicationPacks(packRoot)
                                            .SelectMany(m => m.Versions)
                                            .SelectMany(m => m.Monikers)
-                                           .Where(m => string.Equals(m.Moniker, moniker, StringComparison.OrdinalIgnoreCase))
+                                           .Where(m => m.Moniker.EqualsOrdinalIgnoreCase(moniker))
                                            .SelectMany(m => m.Refs)
                                            .Where(m => m.Culture == culture)
                                            .ToArray();

@@ -9,11 +9,8 @@ public static class FileCopyUtil
             throw new DirectoryNotFoundException($"Source directory {source} not found.");
         }
 
-        if (!Directory.Exists(target))
-        {
-            Directory.CreateDirectory(target);
-        }
-
+        DirectoryUtil.CheckDirectory(target);
+  
         foreach (var sourceFilePath in Directory.EnumerateFiles(source, fileSearchPattern, SearchOption.TopDirectoryOnly))
         {
             if (!filter(sourceFilePath))

@@ -52,8 +52,7 @@ internal partial class Program
 
         if (version is null && !string.IsNullOrWhiteSpace(versionString))
         {
-            Console.WriteLine("input version value is error format.");
-            Environment.Exit(1);
+            WriteMessageAndExit("input version value is error format.");
         }
 
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();

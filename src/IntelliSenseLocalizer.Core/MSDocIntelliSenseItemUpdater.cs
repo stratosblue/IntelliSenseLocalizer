@@ -124,7 +124,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
         {
             //原始数据最后为一个节点为换行节点
             if (element.ChildNodes[element.ChildNodes.Count - 1] is XmlElement lastElement
-                && string.Equals(lastElement.Name, "para", StringComparison.OrdinalIgnoreCase))
+                && lastElement.Name.EqualsOrdinalIgnoreCase("para"))
             {
                 appendLastNode = lastElement.CloneNode(true);
             }

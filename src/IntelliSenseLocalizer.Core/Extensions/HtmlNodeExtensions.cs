@@ -6,7 +6,7 @@ internal static class HtmlNodeExtensions
     {
         while (htmlNode.NextSibling is HtmlNode nextNode)
         {
-            if (string.Equals(nextNode.Name, tagName, StringComparison.OrdinalIgnoreCase))
+            if (nextNode.Name.EqualsOrdinalIgnoreCase(tagName))
             {
                 return nextNode;
             }
@@ -21,7 +21,7 @@ internal static class HtmlNodeExtensions
     {
         while (htmlNode.PreviousSibling is HtmlNode preNode)
         {
-            if (string.Equals(preNode.Name, tagName, StringComparison.OrdinalIgnoreCase))
+            if (preNode.Name.EqualsOrdinalIgnoreCase(tagName))
             {
                 return preNode;
             }

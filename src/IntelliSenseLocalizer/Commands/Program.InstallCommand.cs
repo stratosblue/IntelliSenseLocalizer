@@ -100,16 +100,14 @@ internal partial class Program
             var assetsInfos = await FindAssetsAtReleasesAsync(moniker);
             if (assetsInfos.FirstOrDefault(m => m.Name.Contains(locale, StringComparison.OrdinalIgnoreCase) && m.Name.Contains(contentCompare, StringComparison.OrdinalIgnoreCase)) is not AssetsInfo targetAssetsInfo)
             {
-                Console.WriteLine($"Not found {moniker}@{locale}@{contentCompareType} at github. Please build it yourself.");
-                Environment.Exit(1);
+                WriteMessageAndExit($"Not found {moniker}@{locale}@{contentCompareType} at github. Please build it yourself.");
                 return;
             }
             await InstallFromUrlAsync(targetAssetsInfo.DownloadUrl, target, targetAssetsInfo.Name);
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Load from github fail. {ex.Message}.");
-            Environment.Exit(1);
+            WriteMessageAndExit($"Load from github fail. {ex.Message}.");
             throw;
         }
 
@@ -154,8 +152,7 @@ internal partial class Program
              && !TryGetFileName(httpOperationResult.ResponseMessage, out fileName))
             || !TryGetArchivePackageInfo(Path.GetFileNameWithoutExtension(fileName), out var moniker, out var locale, out var contentCompareType))
         {
-            Console.WriteLine("can not get correct file name.");
-            Environment.Exit(1);
+            WriteMessageAndExit("can not get correct file name.");
             return;
         }
 
@@ -188,8 +185,7 @@ internal partial class Program
         var packRoot = DotNetEnvironmentUtil.GetSDKPackRoot(target);
         if (!Directory.Exists(packRoot))
         {
-            Console.WriteLine($"not found any pack at the target SDK folder {target}. please check input.");
-            Environment.Exit(1);
+            WriteMessageAndExit($"not found any pack at the target SDK folder {target}. please check input.");
         }
 
         var applicationPackRefs = DotNetEnvironmentUtil.GetAllApplicationPacks(packRoot)
@@ -236,8 +232,7 @@ internal partial class Program
         {
             if (!TryGetArchivePackageInfo(Path.GetFileNameWithoutExtension(sourceFile), out var moniker, out var locale, out var contentCompareType))
             {
-                Console.WriteLine("The file name must be moniker@locale@ContentCompareType like net6.0@zh-cn@LocaleFirst.");
-                Environment.Exit(1);
+                WriteMessageAndExit("The file name must be moniker@locale@ContentCompareType like net6.0@zh-cn@LocaleFirst.");
                 return;
             }
 
@@ -249,8 +244,7 @@ internal partial class Program
             }
             catch
             {
-                Console.WriteLine($"open \"{sourceFile}\" fail. confirm the file is a valid archive file.");
-                Environment.Exit(1);
+                WriteMessageAndExit($"open \"{sourceFile}\" fail. confirm the file is a valid archive file.");
                 return;
             }
             InstallFromZipArchive(target, moniker, locale, zipArchive);

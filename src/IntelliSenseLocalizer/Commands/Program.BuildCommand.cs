@@ -86,7 +86,7 @@ internal partial class Program
             Environment.Exit(1);
         }
 
-        var refDescriptors = applicationPackDescriptors.Where(m => string.IsNullOrEmpty(packName) || string.Equals(m.Name, packName, StringComparison.OrdinalIgnoreCase))
+        var refDescriptors = applicationPackDescriptors.Where(m => string.IsNullOrEmpty(packName) || m.Name.EqualsOrdinalIgnoreCase(packName))
                                                        .SelectMany(m => m.Versions)
                                                        .Where(m => m.Version.Equals(version))
                                                        .SelectMany(m => m.Monikers)
