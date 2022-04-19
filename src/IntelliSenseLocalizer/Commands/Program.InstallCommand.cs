@@ -17,10 +17,10 @@ internal partial class Program
     private static Command BuildInstallCommand()
     {
         var installCommand = new Command("install", Resources.StringCMDInstallDescription);
-        var sourceOption = new Option<string>(new[] { "-s", "--source" }, () => LocalizerEnvironment.OutputRoot, Resources.StringCMDInstallOptionSourceDescription);
+        var sourceOption = new Argument<string>("source", Resources.StringCMDInstallOptionSourceDescription);
         var targetOption = new Option<string>(new[] { "-t", "--target" }, () => LocalizerEnvironment.DefaultSdkRoot, Resources.StringCMDInstallOptionTargetDescription);
 
-        installCommand.AddOption(sourceOption);
+        installCommand.AddArgument(sourceOption);
         installCommand.AddOption(targetOption);
 
         installCommand.SetHandler((string source, string target) =>

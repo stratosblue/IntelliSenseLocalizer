@@ -162,7 +162,10 @@ internal partial class Program
 
                 zipArchive.Dispose();
                 fileStream.Dispose();
-                File.Move(tmpZipFileName, Path.Combine(outputRoot, $"{outputPackName}.zip"), true);
+                var finalZipFilePath = Path.Combine(outputRoot, $"{outputPackName}.zip");
+                File.Move(tmpZipFileName, finalZipFilePath, true);
+
+                s_logger.LogWarning("localization pack is saved at {finalZipFilePath}.", finalZipFilePath);
             }
         }
     }

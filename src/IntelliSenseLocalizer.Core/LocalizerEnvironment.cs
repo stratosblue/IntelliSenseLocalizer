@@ -15,6 +15,7 @@ public static class LocalizerEnvironment
     public static string LogRoot { get; }
 
     public static string OutputRoot { get; }
+    
     public static string WorkRootDirectory { get; }
 
     static LocalizerEnvironment()

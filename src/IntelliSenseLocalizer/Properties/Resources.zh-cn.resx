@@ -148,7 +148,7 @@
     <value>清理下载或缓存文件。</value>
   </data>
   <data name="StringCMDInstallAutoInstallDescription" xml:space="preserve">
-    <value>使用当前区域从github自动加载本地化的intellisense文件包（如果存在）并安装它。</value>
+    <value>尝试从github安装本地化的intellisense文件包。</value>
   </data>
   <data name="StringCMDInstallAutoOptionMonikerDescription" xml:space="preserve">
     <value>指定.net名称。如 "net6.0"。默认为已安装最高版本的.net。</value>
@@ -160,7 +160,7 @@
     <value>指定区域。如 "zh-cn"。默认复制所有文件。</value>
   </data>
   <data name="StringCMDInstallOptionSourceDescription" xml:space="preserve">
-    <value>指定安装的源文件夹。</value>
+    <value>指定安装的源文件（本地或http url）。</value>
   </data>
   <data name="StringCMDInstallOptionTargetDescription" xml:space="preserve">
     <value>指定安装的目标SDK文件夹。</value>

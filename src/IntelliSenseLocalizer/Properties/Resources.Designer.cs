@@ -151,7 +151,7 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
-        ///   查找类似 automatically load and install the localized IntelliSense archive from GitHub (if existed) using the current locale. 的本地化字符串。
+        ///   查找类似 try install the localized IntelliSense archive from GitHub. 的本地化字符串。
         /// </summary>
         internal static string StringCMDInstallAutoInstallDescription {
             get {
@@ -187,7 +187,7 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
-        ///   查找类似 set the install source directory. 的本地化字符串。
+        ///   查找类似 set the install source file(local or http url). 的本地化字符串。
         /// </summary>
         internal static string StringCMDInstallOptionSourceDescription {
             get {

@@ -8,24 +8,30 @@ a tool for generate Localized IntelliSense files. 用于生成本地化IntelliSe
 dotnet tool install -g islocalizer --prerelease
 ```
 
-### 2. get the local Localized IntelliSense files
+### 2. try install Localized IntelliSense files from github
 
-There has two options:
+This command try get the Localized IntelliSense files from github what moniker is `net6.0` and locale is `zh-cn`. And install it:
 
-#### 1. load from github (if there has target file)
 ```shell
-islocalizer load github
+islocalizer install auto -m net6.0 -l zh-cn
+```
+Also you can set the ContentCompareType by `-cc`
+```shell
+islocalizer install auto -m net6.0 -l zh-cn -cc LocaleFirst
 ```
 
-#### 2. build file yourself
+### 3. build the local Localized IntelliSense files yourself
+
 ```shell
 islocalizer build
 ```
 This command may take a whole day... But when cached all page it will be completed faster.
+The archive package will be saved in the default output directory. You can found the path in console.
 
-### 3. install builded file
+### 4. install builded file
 ```shell
-islocalizer install
+islocalizer install {ArchivePackagePath}
 ```
+`ArchivePackagePath` is the path of the archive package that you builded.
 
-#### run `islocalizer -h` to see more command.
+#### run `islocalizer -h` to see more command and helps.
