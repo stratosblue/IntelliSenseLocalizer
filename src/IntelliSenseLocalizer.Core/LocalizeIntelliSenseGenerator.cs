@@ -81,11 +81,8 @@ public class LocalizeIntelliSenseGenerator
         });
 
         var outDir = Path.GetDirectoryName(context.OutputPath);
-        if (outDir is not null
-            && !Directory.Exists(outDir))
-        {
-            Directory.CreateDirectory(outDir);
-        }
+        DirectoryUtil.CheckDirectory(outDir);
+
         xmlDocument.Save(context.OutputPath);
     }
 }

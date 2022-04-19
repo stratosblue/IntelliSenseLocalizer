@@ -20,10 +20,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         _cacheRoot = cacheRoot;
         _parallelSemaphore = new SemaphoreSlim(parallelCount, parallelCount);
 
-        if (!Directory.Exists(cacheRoot))
-        {
-            Directory.CreateDirectory(cacheRoot);
-        }
+        DirectoryUtil.CheckDirectory(cacheRoot);
     }
 
     public void Dispose()
@@ -84,10 +81,8 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         response.ResponseMessage!.EnsureSuccessStatusCode();
 
         var html = response.Data!;
-        if (!Directory.Exists(cacheDriectory))
-        {
-            Directory.CreateDirectory(cacheDriectory);
-        }
+        DirectoryUtil.CheckDirectory(cacheDriectory);
+
         await File.WriteAllTextAsync(cacheFilePath, html, cancellationToken);
 
         return html;

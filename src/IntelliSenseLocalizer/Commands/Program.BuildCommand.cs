@@ -14,7 +14,7 @@ internal partial class Program
     private static Command BuildBuildCommand()
     {
         var packNameOption = new Option<string>(new[] { "-p", "--pack" }, Resources.StringCMDBuildOptionPackDescription);
-        var versionOption = new Option<string>(new[] { "-v", "--version" }, Resources.StringCMDBuildOptionVersionDescription);
+        var monikerOption = new Option<string>(new[] { "-m", "--moniker" }, Resources.StringCMDBuildOptionMonikerDescription);
         var localeOption = new Option<string>(new[] { "-l", "--locale" }, () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDBuildOptionLocaleDescription);
         var contentCompareTypeOption = new Option<ContentCompareType>(new[] { "-cc", "--content-compare" }, () => ContentCompareType.OriginFirst, Resources.StringCMDBuildOptionContentCompareDescription);
         var separateLineOption = new Option<string?>(new[] { "-sl", "--separate-line" }, Resources.StringCMDBuildOptionSeparateLineDescription);
@@ -25,7 +25,7 @@ internal partial class Program
         var buildCommand = new Command("build", Resources.StringCMDBuildDescription)
         {
             packNameOption,
-            versionOption,
+            monikerOption,
             localeOption,
             contentCompareTypeOption,
             separateLineOption,
@@ -34,7 +34,7 @@ internal partial class Program
             nocacheOption,
         };
 
-        buildCommand.SetHandler<string, string, string, ContentCompareType, string?, string, bool, int, int?>(BuildLocalizedIntelliSenseFile, packNameOption, versionOption, localeOption, contentCompareTypeOption, separateLineOption, outputOption, nocacheOption, parallelCountOption, s_logLevelOption);
+        buildCommand.SetHandler<string, string, string, ContentCompareType, string?, string, bool, int, int?>(BuildLocalizedIntelliSenseFile, packNameOption, monikerOption, localeOption, contentCompareTypeOption, separateLineOption, outputOption, nocacheOption, parallelCountOption, s_logLevelOption);
 
         return buildCommand;
     }
@@ -70,10 +70,7 @@ internal partial class Program
 
         outputRoot = string.IsNullOrWhiteSpace(outputRoot) ? LocalizerEnvironment.OutputRoot : outputRoot;
 
-        if (!Directory.Exists(outputRoot))
-        {
-            Directory.CreateDirectory(outputRoot);
-        }
+        DirectoryUtil.CheckDirectory(outputRoot);
 
         var version = Version.TryParse(versionString, out var pv) ? pv : null;
 
@@ -81,10 +78,7 @@ internal partial class Program
 
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();
 
-        if (version is null)
-        {
-            version = applicationPackDescriptors.SelectMany(m => m.Versions).Max(m => m.Version);
-        }
+        version ??= applicationPackDescriptors.SelectMany(m => m.Versions).Max(m => m.Version);
 
         if (version is null || version.Major < 6)
         {
@@ -168,7 +162,7 @@ internal partial class Program
 
                 zipArchive.Dispose();
                 fileStream.Dispose();
-                File.Move(tmpZipFileName, Path.Combine(rootPath, $"{outputPackName}.zip"), true);
+                File.Move(tmpZipFileName, Path.Combine(outputRoot, $"{outputPackName}.zip"), true);
             }
         }
     }

@@ -126,6 +126,9 @@
   <data name="StringCMDBuildOptionLocaleDescription" xml:space="preserve">
     <value>select locale. eg: "zh-cn". use the system culture info default.</value>
   </data>
+  <data name="StringCMDBuildOptionMonikerDescription" xml:space="preserve">
+    <value>select .net moniker. eg: "net6.0". default is the installed latest version.</value>
+  </data>
   <data name="StringCMDBuildOptionNoCacheDescription" xml:space="preserve">
     <value>set not use existed local page cache.</value>
   </data>
@@ -141,14 +144,14 @@
   <data name="StringCMDBuildOptionSeparateLineDescription" xml:space="preserve">
     <value>the separate line between origin and locale content. (effective only use bilingual comparison)</value>
   </data>
-  <data name="StringCMDBuildOptionVersionDescription" xml:space="preserve">
-    <value>select .net version. eg: "6.0.3". process the lastest version default.</value>
-  </data>
   <data name="StringCMDClearDescription" xml:space="preserve">
     <value>clear the download or cache files.</value>
   </data>
   <data name="StringCMDInstallAutoInstallDescription" xml:space="preserve">
     <value>automatically load and install the localized IntelliSense archive from GitHub (if existed) using the current locale.</value>
+  </data>
+  <data name="StringCMDInstallAutoOptionMonikerDescription" xml:space="preserve">
+    <value>select .net moniker. eg: "net6.0". default is the installed latest version.</value>
   </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>install the localized intellisense file. (copy all .xml file from source directory to target SDK pack directory)</value>
@@ -161,9 +164,6 @@
   </data>
   <data name="StringCMDInstallOptionTargetDescription" xml:space="preserve">
     <value>set the install target sdk directory.</value>
-  </data>
-  <data name="StringCMDInstallOptionVersionDescription" xml:space="preserve">
-    <value>select .net version. eg: "6.0.3". copy all default.</value>
   </data>
   <data name="StringCMDLoadArgumentSourceDescription" xml:space="preserve">
     <value>load archive package source file.</value>

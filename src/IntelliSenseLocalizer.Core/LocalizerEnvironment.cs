@@ -34,18 +34,10 @@ public static class LocalizerEnvironment
 
     public static void CheckDirectories()
     {
-        CheckDirectory(WorkRootDirectory);
-        CheckDirectory(LogRoot);
-        CheckDirectory(OutputRoot);
-        CheckDirectory(CacheRoot);
-        CheckDirectory(BuildRoot);
-
-        static void CheckDirectory(string directory)
-        {
-            if (!Directory.Exists(directory))
-            {
-                Directory.CreateDirectory(directory);
-            }
-        }
+        DirectoryUtil.CheckDirectory(WorkRootDirectory);
+        DirectoryUtil.CheckDirectory(LogRoot);
+        DirectoryUtil.CheckDirectory(OutputRoot);
+        DirectoryUtil.CheckDirectory(CacheRoot);
+        DirectoryUtil.CheckDirectory(BuildRoot);
     }
 }

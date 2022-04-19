@@ -30,7 +30,6 @@ internal partial class Program
             BuildUnInstallCommand(),
             BuildShowCommand(),
             BuildBuildCommand(),
-            BuildLoadCommand(),
             BuildClearCommand(),
         };
 
@@ -102,6 +101,12 @@ internal partial class Program
                         ? (LogEventLevel)logLevel
                         : LogEventLevel.Verbose;
         s_consoleLoggingLevelSwitch.MinimumLevel = level;
+    }
+
+    private static void WriteMessageAndExit(string message)
+    {
+        Console.WriteLine(message);
+        Environment.Exit(1);
     }
 
     #endregion Base

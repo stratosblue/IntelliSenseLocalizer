@@ -88,6 +88,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 select .net moniker. eg: &quot;net6.0&quot;. default is the installed latest version. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDBuildOptionMonikerDescription {
+            get {
+                return ResourceManager.GetString("StringCMDBuildOptionMonikerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 set not use existed local page cache. 的本地化字符串。
         /// </summary>
         internal static string StringCMDBuildOptionNoCacheDescription {
@@ -133,15 +142,6 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
-        ///   查找类似 select .net version. eg: &quot;6.0.3&quot;. process the lastest version default. 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDBuildOptionVersionDescription {
-            get {
-                return ResourceManager.GetString("StringCMDBuildOptionVersionDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   查找类似 clear the download or cache files. 的本地化字符串。
         /// </summary>
         internal static string StringCMDClearDescription {
@@ -156,6 +156,15 @@ namespace IntelliSenseLocalizer.Properties {
         internal static string StringCMDInstallAutoInstallDescription {
             get {
                 return ResourceManager.GetString("StringCMDInstallAutoInstallDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 select .net moniker. eg: &quot;net6.0&quot;. default is the installed latest version. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDInstallAutoOptionMonikerDescription {
+            get {
+                return ResourceManager.GetString("StringCMDInstallAutoOptionMonikerDescription", resourceCulture);
             }
         }
         
@@ -192,15 +201,6 @@ namespace IntelliSenseLocalizer.Properties {
         internal static string StringCMDInstallOptionTargetDescription {
             get {
                 return ResourceManager.GetString("StringCMDInstallOptionTargetDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 select .net version. eg: &quot;6.0.3&quot;. copy all default. 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDInstallOptionVersionDescription {
-            get {
-                return ResourceManager.GetString("StringCMDInstallOptionVersionDescription", resourceCulture);
             }
         }
         
