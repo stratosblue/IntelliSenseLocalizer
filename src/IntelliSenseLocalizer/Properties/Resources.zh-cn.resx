@@ -180,11 +180,11 @@
   <data name="StringCMDShowDescription" xml:space="preserve">
     <value>查询和展示已安装SDK的更多信息。</value>
   </data>
+  <data name="StringCMDShowOptionMonikerDescription" xml:space="preserve">
+    <value>用于筛选.net名称的正则字符串。</value>
+  </data>
   <data name="StringCMDShowOptionPackDescription" xml:space="preserve">
     <value>用于筛选应用程序包的正则字符串。</value>
-  </data>
-  <data name="StringCMDShowOptionVersionDescription" xml:space="preserve">
-    <value>用于筛选版本的正则字符串。</value>
   </data>
   <data name="StringCMDShowPackRefsDescription" xml:space="preserve">
     <value>列出应用程序包的引用文件。</value>
@@ -213,10 +213,10 @@
   <data name="StringRootCommandDescription" xml:space="preserve">
     <value>用于生成本地化智能感知文件的工具
 示例:
-展示Microsoft.NETCore.App的6.0.4版本中包含'threading'的xml文件:
-.\islocalizer show refs -p Microsoft.NETCore.App -v 6.0.4 -f threading
-构建Microsoft.AspNetCore.App的6.0.4的本地化智能感知文件:
-.\islocalizer build -p Microsoft.AspNetCore.App -v 6.0.4
+展示net6.0的Microsoft.NETCore.App中包含'threading'的xml文件:
+.\islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+构建net6.0的Microsoft.AspNetCore.App的本地化智能感知文件:
+.\islocalizer build -p Microsoft.AspNetCore.App -m net6.0
 安装已构建好的文件 (可能需要以管理员身份运行):
 .\islocalizer install
 清理构建的缓存:

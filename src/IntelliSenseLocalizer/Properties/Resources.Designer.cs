@@ -250,20 +250,20 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 a regex string for filter .net moniker in result. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDShowOptionMonikerDescription {
+            get {
+                return ResourceManager.GetString("StringCMDShowOptionMonikerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 a regex string for filter application pack name in result. 的本地化字符串。
         /// </summary>
         internal static string StringCMDShowOptionPackDescription {
             get {
                 return ResourceManager.GetString("StringCMDShowOptionPackDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 a regex string for filter version in result. 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDShowOptionVersionDescription {
-            get {
-                return ResourceManager.GetString("StringCMDShowOptionVersionDescription", resourceCulture);
             }
         }
         
@@ -342,10 +342,10 @@ namespace IntelliSenseLocalizer.Properties {
         /// <summary>
         ///   查找类似 a tool to build and install localize intelliSense file
         ///eg:
-        ///show Microsoft.NETCore.App at version 6.0.4 contains &apos;threading&apos; xml files:
-        ///.\islocalizer show refs -p Microsoft.NETCore.App -v 6.0.4 -f threading
-        ///build Microsoft.AspNetCore.App at version 6.0.4 &apos;s localize intelliSense file:
-        ///.\islocalizer build -p Microsoft.AspNetCore.App -v 6.0.4
+        ///show Microsoft.NETCore.App for net6.0 contains &apos;threading&apos; xml files:
+        ///.\islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+        ///build Microsoft.AspNetCore.App for net6.0 &apos;s localize intelliSense file:
+        ///.\islocalizer build -p Microsoft.AspNetCore.App -m net6.0
         ///install the builded files (may need run as administrator):
         ///.\islocalizer install
         ///clear the build caches:

@@ -26,16 +26,16 @@ internal partial class Program
 
         {
             var packNameOption = new Option<string>(new[] { "-p", "--pack" }, Resources.StringCMDShowOptionPackDescription);
-            var versionOption = new Option<string>(new[] { "-v", "--version" }, Resources.StringCMDShowOptionVersionDescription);
+            var monikerOption = new Option<string>(new[] { "-m", "--moniker" }, Resources.StringCMDShowOptionMonikerDescription);
 
             var showInstalledApplicationPackRefsCommand = new Command("refs", Resources.StringCMDShowPackRefsDescription)
             {
                 packNameOption,
-                versionOption,
+                monikerOption,
                 filterOption,
             };
 
-            showInstalledApplicationPackRefsCommand.SetHandler<string, string, string>(ShowInstalledApplicationPackRefs, packNameOption, versionOption, filterOption);
+            showInstalledApplicationPackRefsCommand.SetHandler<string, string, string>(ShowInstalledApplicationPackRefs, packNameOption, monikerOption, filterOption);
 
             showCommand.AddCommand(showInstalledApplicationPackRefsCommand);
         }
@@ -43,24 +43,19 @@ internal partial class Program
         return showCommand;
     }
 
-    private static void ShowInstalledApplicationPackRefs(string packName, string versionString, string filterString)
+    private static void ShowInstalledApplicationPackRefs(string packName, string moniker, string filterString)
     {
         var packNameFilterFunc = BuildStringFilterFunc(packName);
+        var monikerFilterFunc = BuildStringFilterFunc(moniker);
+
         var filterFunc = BuildStringFilterFunc(filterString);
-
-        var version = Version.TryParse(versionString, out var pv) ? pv : null;
-
-        if (version is null && !string.IsNullOrWhiteSpace(versionString))
-        {
-            WriteMessageAndExit("input version value is error format.");
-        }
 
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();
 
         var query = applicationPackDescriptors.Where(m => packNameFilterFunc(m.Name))
                                               .SelectMany(m => m.Versions)
-                                              .Where(m => version is null || m.Version.Equals(version))
                                               .SelectMany(m => m.Monikers)
+                                              .Where(m => monikerFilterFunc(m.Moniker))
                                               .SelectMany(m => m.Refs)
                                               .SelectMany(m => m.IntelliSenseFiles)
                                               .Where(m => filterFunc(m.Name))
