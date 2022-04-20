@@ -51,6 +51,14 @@ internal partial class Program
                                                        int? logLevel)
     {
         locale = string.IsNullOrWhiteSpace(locale) ? LocalizerEnvironment.CurrentLocale : locale;
+
+        if (string.IsNullOrWhiteSpace("locale"))
+        {
+            s_logger.LogCritical("\"locale\" must be specified.");
+            Environment.Exit(1);
+            return;
+        }
+
         CultureInfo cultureInfo;
         try
         {
@@ -76,12 +84,6 @@ internal partial class Program
         var packNameFilterFunc = BuildStringFilterFunc(packName);
         var monikerFilterFunc = BuildStringFilterFunc(moniker);
 
-        s_logger.LogInformation("Start generate. PackName: {PackName}, Moniker: {Moniker}, Locale: {locale}, ContentCompareType: {ContentCompareType}.",
-                                packName,
-                                moniker,
-                                locale,
-                                contentCompareType);
-
         var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks().ToArray();
 
         var refDescriptors = applicationPackDescriptors.Where(m => packNameFilterFunc(m.Name))
@@ -99,6 +101,12 @@ internal partial class Program
             s_logger.LogCritical("Not found localizeable files.");
             Environment.Exit(1);
         }
+
+        s_logger.LogInformation("Start generate. PackName: {PackName}, Moniker: {Moniker}, Locale: {locale}, ContentCompareType: {ContentCompareType}.",
+                                packName,
+                                moniker,
+                                locale,
+                                contentCompareType);
 
         SetLogLevel(logLevel);
 
