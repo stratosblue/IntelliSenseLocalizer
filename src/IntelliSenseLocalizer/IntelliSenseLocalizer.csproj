@@ -8,7 +8,7 @@
     <ToolCommandName>islocalizer</ToolCommandName>
     <AssemblyName>islocalizer</AssemblyName>
 
-    <PackageReadmeFile>readme.md</PackageReadmeFile>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\..\README.md" Link="readme.md" Pack="true" PackagePath="/" />
+    <None Include="..\..\README.md" Link="README.md" Pack="true" PackagePath="/" />
   </ItemGroup>
   
   <ItemGroup>
