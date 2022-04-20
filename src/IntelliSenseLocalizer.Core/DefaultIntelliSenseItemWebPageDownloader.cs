@@ -36,6 +36,8 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         var cacheDriectory = Path.Combine(_cacheRoot, intelliSenseFile.OwnerPackRef.OwnerMoniker.OwnerVersion.OwnerPack.Name, frameworkMoniker, _locale);
         var cacheFilePath = Path.Combine(cacheDriectory, $"{queryKey}.html");
 
+        DirectoryUtil.CheckDirectory(cacheDriectory);
+        
         var url = $"https://docs.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={frameworkMoniker}";
 
         if (!ignoreCache
@@ -81,7 +83,6 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         response.ResponseMessage!.EnsureSuccessStatusCode();
 
         var html = response.Data!;
-        DirectoryUtil.CheckDirectory(cacheDriectory);
 
         await File.WriteAllTextAsync(cacheFilePath, html, cancellationToken);
 

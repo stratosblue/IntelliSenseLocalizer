@@ -76,12 +76,14 @@ public class LocalizeIntelliSenseGenerator
             }
             catch (Exception ex)
             {
-                _logger.LogWarning("Update IntelliSenseFile Group [{Key}] Fail: {Message}", intelliSenseItemGroup.Key, ex.Message);
+                _logger.LogWarning(ex, "Update IntelliSenseFile Group [{Key}]", intelliSenseItemGroup.Key);
             }
         });
 
         var outDir = Path.GetDirectoryName(context.OutputPath);
         DirectoryUtil.CheckDirectory(outDir);
+
+        _logger.LogDebug("[{Name}] processing completed. Save the file into {OutputPath}.", context.Descriptor.Name, context.OutputPath);
 
         xmlDocument.Save(context.OutputPath);
     }

@@ -197,7 +197,7 @@ internal partial class Program
                                                        .ToArray();
 
         var packEntryGroups = zipArchive.Entries.Where(m => m.Name.IsNotNullOrEmpty())
-                                                .GroupBy(m => m.FullName.Split('\\', StringSplitOptions.RemoveEmptyEntries)[0])
+                                                .GroupBy(m => m.FullName.Contains('/') ? m.FullName.Split('/', StringSplitOptions.RemoveEmptyEntries)[0] : m.FullName.Split('\\', StringSplitOptions.RemoveEmptyEntries)[0])    //路径分隔符可能为 / 或者 \
                                                 .ToDictionary(m => m.Key, m => m.ToArray(), StringComparer.OrdinalIgnoreCase);
 
         var count = 0;
@@ -217,8 +217,8 @@ internal partial class Program
             foreach (var entry in entries)
             {
                 var targetFile = Path.Combine(rootPath, entry.Name);
-                Console.WriteLine($"Create File: {targetFile}");
                 entry.ExtractToFile(targetFile, true);
+                Console.WriteLine($"Created File: {targetFile}");
                 count++;
             }
         }

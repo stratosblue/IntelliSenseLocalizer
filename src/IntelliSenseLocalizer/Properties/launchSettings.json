@@ -2,10 +2,9 @@
   "profiles": {
     "IntelliSenseLocalizer": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] build -p Microsoft.WindowsDesktop.App.Ref -v 6.0.4 -ll 2 -cc 2 -sl \"-------- 以下为原始注释 --------\""
+      "commandLineArgs": "[debug] build -p Microsoft.WindowsDesktop.App.Ref -m net6.0 -ll 2 -cc 2 -sl \"-------- 以下为原始注释 --------\""
       //"commandLineArgs": "[debug] show refs"
-      //"commandLineArgs": "[debug] clear cache"
-      //"commandLineArgs": "[debug] install"
+      //"commandLineArgs": "[debug] clear build"
       //"commandLineArgs": "[debug] install auto"
       //"commandLineArgs": "[debug] uninstall net6.0 zh-cn"
     }

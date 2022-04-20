@@ -1,5 +1,12 @@
-# IntelliSenseLocalizer
+# IntelliSenseLocalizer [中文](./README.zh-cn.md)
 a tool for generate Localized IntelliSense files. 用于生成本地化IntelliSense文件的工具。
+
+## intro
+Before `.net6` we can download the localized .NET IntelliSense files from this page - [Download localized .NET IntelliSense files](https://dotnet.microsoft.com/en-us/download/intellisense). But long after `.net6` was released. This page did not add the localized .NET IntelliSense files for `.net6`. According to this [issue](https://github.com/dotnet/docs/issues/27283) in `dotnet/docs` there is no localized .NET IntelliSense files any more - "`Yes, unfortunately, we will no longer be localizing IntelliSense.`". But the [online docs](https://docs.microsoft.com) has the localized descriptions. So this tool was born.
+
+`IntelliSenseLocalizer` use the [online docs](https://docs.microsoft.com) to generate Localized IntelliSense files. This tool will download all api pages and analysis the content to match the origin IntelliSense file content and generate the target `xml`.
+
+Benefit from [online docs](https://docs.microsoft.com)'s nice localization and uniform page layout. This tool can theoretically generate all locale's file. But `when the page layout change this tool cannot automatically adapt to the new layout`.
 
 ## How to use
 
