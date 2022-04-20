@@ -12,7 +12,7 @@ Benefit from [online docs](https://docs.microsoft.com)'s nice localization and u
 
 ### 1. install the tool
 ```shell
-dotnet tool install -g islocalizer --prerelease
+dotnet tool install -g islocalizer
 ```
 
 ### 2. try install Localized IntelliSense files from github

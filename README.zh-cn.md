@@ -2,7 +2,7 @@
 用于生成本地化IntelliSense文件的工具。
 
 ## 简介
-在`.net6`之前，我们可以在这个页面 - [Download localized .NET IntelliSense files](https://dotnet.microsoft.com/en-us/download/intellisense)下载本地化的智能感知文件。但`.net6`发布很长一段时间后，这个页面也没有添加`.net6`的本地化的智能感知文件。根据`dotnet/docs`中的这个[issue](https://github.com/dotnet/docs/issues/27283)，里面说不再提供本地化只能感知文件了 - "`Yes, unfortunately, we will no longer be localizing IntelliSense.`"。但是[在线文档](https://docs.microsoft.com)里面还有本地化描述。所以有了这个工具。
+在`.net6`之前，我们可以在这个页面 - [Download localized .NET IntelliSense files](https://dotnet.microsoft.com/en-us/download/intellisense)下载本地化的智能感知文件。但`.net6`发布很长一段时间后，这个页面也没有添加`.net6`的本地化的智能感知文件。根据`dotnet/docs`中的这个[issue](https://github.com/dotnet/docs/issues/27283)，里面说不再提供本地化智能感知文件了 - "`Yes, unfortunately, we will no longer be localizing IntelliSense.`"。但是[在线文档](https://docs.microsoft.com)里面还有本地化描述。所以有了这个工具。
 
 `IntelliSenseLocalizer`使用[在线文档](https://docs.microsoft.com)生成本地化智能感知文件。工具会下载所有的api页面并分析页面以匹配原始的智能感知文件，然后生成目标`xml`。
 
@@ -12,7 +12,7 @@
 
 ### 1. 安装本工具
 ```shell
-dotnet tool install -g islocalizer --prerelease
+dotnet tool install -g islocalizer
 ```
 
 ### 2. 尝试从github安装已生成好的智能感知文件

@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.IO.Compression;
 
+using IntelliSenseLocalizer.Models;
 using IntelliSenseLocalizer.Properties;
 
 using Microsoft.Extensions.DependencyInjection;
@@ -40,7 +41,7 @@ internal partial class Program
     }
 
     private static void BuildLocalizedIntelliSenseFile(string packName,
-                                                       string versionString,
+                                                       string moniker,
                                                        string locale,
                                                        ContentCompareType contentCompareType,
                                                        string? separateLine,
@@ -72,24 +73,23 @@ internal partial class Program
 
         DirectoryUtil.CheckDirectory(outputRoot);
 
-        var version = Version.TryParse(versionString, out var pv) ? pv : null;
-
         var packNameFilterFunc = BuildStringFilterFunc(packName);
+        var monikerFilterFunc = BuildStringFilterFunc(moniker);
 
-        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks();
+        s_logger.LogInformation("Start generate. PackName: {PackName}, Moniker: {Moniker}, Locale: {locale}, ContentCompareType: {ContentCompareType}.",
+                                packName,
+                                moniker,
+                                locale,
+                                contentCompareType);
 
-        version ??= applicationPackDescriptors.SelectMany(m => m.Versions).Max(m => m.Version);
+        var applicationPackDescriptors = DotNetEnvironmentUtil.GetAllApplicationPacks().ToArray();
 
-        if (version is null || version.Major < 6)
-        {
-            s_logger.LogCritical("Not found the installed right version. or the input version is error.");
-            Environment.Exit(1);
-        }
-
-        var refDescriptors = applicationPackDescriptors.Where(m => string.IsNullOrEmpty(packName) || m.Name.EqualsOrdinalIgnoreCase(packName))
+        var refDescriptors = applicationPackDescriptors.Where(m => packNameFilterFunc(m.Name))
                                                        .SelectMany(m => m.Versions)
-                                                       .Where(m => m.Version.Equals(version))
                                                        .SelectMany(m => m.Monikers)
+                                                       .Where(m => monikerFilterFunc(m.Moniker))
+                                                       .GroupBy(m => m.Moniker)
+                                                       .SelectMany(GetDistinctApplicationPackRefMonikerDescriptors)
                                                        .SelectMany(m => m.Refs)
                                                        .Where(m => m.Culture is null)
                                                        .ToArray();
@@ -117,6 +117,12 @@ internal partial class Program
                 refCount++;
                 var applicationPackRefMoniker = refDescriptor.OwnerMoniker;
                 var moniker = applicationPackRefMoniker.Moniker;
+
+                s_logger.LogInformation("Processing pack [{PackName}:{Moniker}]. Progress {packRefCount}/{packRefAll}.",
+                                        refDescriptor.OwnerMoniker.OwnerVersion.OwnerPack.Name,
+                                        applicationPackRefMoniker.Moniker,
+                                        refCount,
+                                        refDescriptors.Length);
 
                 int intelliSenseFileCount = 0;
                 await Parallel.ForEachAsync(refDescriptor.IntelliSenseFiles, parallelOptions, async (intelliSenseFileDescriptor, cancellationToken) =>
@@ -167,6 +173,16 @@ internal partial class Program
 
                 s_logger.LogWarning("localization pack is saved at {finalZipFilePath}.", finalZipFilePath);
             }
+        }
+
+        static IEnumerable<ApplicationPackRefMonikerDescriptor> GetDistinctApplicationPackRefMonikerDescriptors(IEnumerable<ApplicationPackRefMonikerDescriptor> descriptors)
+        {
+            var dic = new Dictionary<string, ApplicationPackRefMonikerDescriptor>(StringComparer.OrdinalIgnoreCase);
+            foreach (var descriptor in descriptors)
+            {
+                dic[descriptor.OwnerVersion.OwnerPack.Name] = descriptor;
+            }
+            return dic.Values;
         }
     }
 }
