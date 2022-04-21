@@ -29,8 +29,9 @@ islocalizer install auto -m net6.0 -l zh-cn -cc LocaleFirst
 
 ### 3. 自己构建本地化智能感知文件
 
+构建`net6.0`相关的文件:
 ```shell
-islocalizer build
+islocalizer build -m net6.0
 ```
 这个命令可能会运行很久。。。不过缓存完文件后，第二次生成会快很多。
 生成的压缩包将会存放到默认输出目录，可以在控制台输出中找到路径。

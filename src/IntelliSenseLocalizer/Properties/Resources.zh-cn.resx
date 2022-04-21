@@ -127,7 +127,7 @@
     <value>指定区域。如 "zh-cn"。默认使用系统的区域信息。</value>
   </data>
   <data name="StringCMDBuildOptionMonikerDescription" xml:space="preserve">
-    <value>指定.net名称。如 "net6.0"。默认为已安装最高版本的.net。</value>
+    <value>指定.net名称。如 "net6.0"。默认为所有已安装的框架。</value>
   </data>
   <data name="StringCMDBuildOptionNoCacheDescription" xml:space="preserve">
     <value>指定不使用本地已存在的页面缓存。</value>

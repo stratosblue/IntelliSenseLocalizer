@@ -29,8 +29,9 @@ islocalizer install auto -m net6.0 -l zh-cn -cc LocaleFirst
 
 ### 3. build the local Localized IntelliSense files yourself
 
+build files about `net6.0`:
 ```shell
-islocalizer build
+islocalizer build -m net6.0
 ```
 This command may take a whole day... But when cached all page it will be completed faster.
 The archive package will be saved in the default output directory. You can found the path in console.

@@ -127,7 +127,7 @@
     <value>select locale. eg: "zh-cn". use the system culture info default.</value>
   </data>
   <data name="StringCMDBuildOptionMonikerDescription" xml:space="preserve">
-    <value>select .net moniker. eg: "net6.0". default is the installed latest version.</value>
+    <value>select .net moniker. eg: "net6.0". default is all of installed framework.</value>
   </data>
   <data name="StringCMDBuildOptionNoCacheDescription" xml:space="preserve">
     <value>set not use existed local page cache.</value>

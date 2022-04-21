@@ -88,7 +88,7 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
-        ///   查找类似 select .net moniker. eg: &quot;net6.0&quot;. default is the installed latest version. 的本地化字符串。
+        ///   查找类似 select .net moniker. eg: &quot;net6.0&quot;. default is all of installed framework. 的本地化字符串。
         /// </summary>
         internal static string StringCMDBuildOptionMonikerDescription {
             get {
