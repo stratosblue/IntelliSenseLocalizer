@@ -40,6 +40,8 @@ public class ApplicationPackDescriptor : IEquatable<ApplicationPackDescriptor>
         foreach (var versionPath in Directory.EnumerateDirectories(path, "*", SearchOption.TopDirectoryOnly))
         {
             var versionString = Path.GetFileName(versionPath);
+            var i = versionString.IndexOf('-');
+            if (i >= 0) versionString = versionString[..i];
             if (Version.TryParse(versionString, out var version))
             {
                 yield return new ApplicationPackVersionDescriptor(applicationPack, version, versionPath);
