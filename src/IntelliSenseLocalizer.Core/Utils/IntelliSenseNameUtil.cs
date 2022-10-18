@@ -56,6 +56,8 @@ public static class IntelliSenseNameUtil
     /// .Replace('#', '-')
     /// .Replace('{', '-')
     /// .Replace('}', '-')
+    /// .Replace('<', '-')
+    /// .Replace('>', '-')
     /// .Replace('@', '-')
     /// .Replace(',', '-')
     /// .ToLowerInvariant()
@@ -68,6 +70,8 @@ public static class IntelliSenseNameUtil
                    .Replace('#', '-')
                    .Replace('{', '-')
                    .Replace('}', '-')
+                   .Replace('<', '-')
+                   .Replace('>', '-')
                    .Replace('@', '-')
                    .Replace(',', '-')
                    .ToLowerInvariant();

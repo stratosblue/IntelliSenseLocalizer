@@ -37,7 +37,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         var cacheFilePath = Path.Combine(cacheDriectory, $"{queryKey}.html");
 
         DirectoryUtil.CheckDirectory(cacheDriectory);
-        
+
         var url = $"https://docs.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={frameworkMoniker}";
 
         if (!ignoreCache
@@ -52,15 +52,22 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         }
 
         HttpOperationResult<string> response;
+
+        using var request = url.CreateHttpRequest(true)
+                               .UseUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.52")
+                               .UseSystemProxy()
+                               .AutoRedirection()
+                               .WithCancellation(cancellationToken);
+
         await _parallelSemaphore.WaitAsync(cancellationToken);
         try
         {
-            response = await url.CreateHttpRequest()
-                                .UseUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.52")
-                                .UseSystemProxy()
-                                .AutoRedirection()
-                                .WithCancellation(cancellationToken)
-                                .TryGetAsStringAsync();
+            response = await request.TryGetAsStringAsync();
+            if (!response.IsSuccessStatusCode
+                && response.ResponseMessage?.StatusCode != System.Net.HttpStatusCode.NotFound)  //非成功状态再尝试一次
+            {
+                response = await request.TryGetAsStringAsync();
+            }
         }
         finally
         {
@@ -69,15 +76,15 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
 
         using var disposable = response;
 
-        if (response.Exception is not null)
-        {
-            throw response.Exception;
-        }
-
         if (response.ResponseMessage?.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             await File.WriteAllTextAsync(cacheFilePath, NotFoundPageContent, cancellationToken);
             throw NotFoundException();
+        }
+
+        if (response.Exception is not null)
+        {
+            throw response.Exception;
         }
 
         response.ResponseMessage!.EnsureSuccessStatusCode();
