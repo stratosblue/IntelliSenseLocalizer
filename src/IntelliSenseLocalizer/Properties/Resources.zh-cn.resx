@@ -144,6 +144,9 @@
   <data name="StringCMDBuildOptionSeparateLineDescription" xml:space="preserve">
     <value>原始内容和本地化内容的分割行。(仅在双语对照时有效)</value>
   </data>
+  <data name="StringCMDCleanDescription" xml:space="preserve">
+    <value>清理悬空的ref文件夹。</value>
+  </data>
   <data name="StringCMDClearDescription" xml:space="preserve">
     <value>清理下载或缓存文件。</value>
   </data>

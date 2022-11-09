@@ -142,6 +142,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 clean the dangling ref folders. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDCleanDescription {
+            get {
+                return ResourceManager.GetString("StringCMDCleanDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 clear the download or cache files. 的本地化字符串。
         /// </summary>
         internal static string StringCMDClearDescription {

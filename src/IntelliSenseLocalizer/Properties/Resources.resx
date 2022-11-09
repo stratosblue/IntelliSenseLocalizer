@@ -144,6 +144,9 @@
   <data name="StringCMDBuildOptionSeparateLineDescription" xml:space="preserve">
     <value>the separate line between origin and locale content. (effective only use bilingual comparison)</value>
   </data>
+  <data name="StringCMDCleanDescription" xml:space="preserve">
+    <value>clean the dangling ref folders.</value>
+  </data>
   <data name="StringCMDClearDescription" xml:space="preserve">
     <value>clear the download or cache files.</value>
   </data>

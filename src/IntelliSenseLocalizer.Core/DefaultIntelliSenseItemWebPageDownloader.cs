@@ -38,7 +38,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
 
         DirectoryUtil.CheckDirectory(cacheDriectory);
 
-        var url = $"https://docs.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={frameworkMoniker}";
+        var url = $"https://learn.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={frameworkMoniker}";
 
         if (!ignoreCache
             && File.Exists(cacheFilePath))
