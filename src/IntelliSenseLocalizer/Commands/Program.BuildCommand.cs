@@ -12,6 +12,8 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    #region Private 方法
+
     private static Command BuildBuildCommand()
     {
         var packNameOption = new Option<string>(new[] { "-p", "--pack" }, Resources.StringCMDBuildOptionPackDescription);
@@ -142,6 +144,8 @@ internal partial class Program
 
                     var buildPath = Path.Combine(LocalizerEnvironment.BuildRoot, $"{moniker}@{locale}@{contentCompareType}", applicationPack.Name, intelliSenseFileDescriptor.FileName);
 
+                    DirectoryUtil.CheckDirectory(buildPath);
+
                     s_logger.LogInformation("Progress PackRef[{packRefCount}/{packRefAll}]->File[{fileCount}/{fileAll}]. Processing [{packName}:{version}:{name}] now.",
                                             refCount,
                                             refDescriptors.Length,
@@ -165,6 +169,8 @@ internal partial class Program
             foreach (var outputPackName in outputPackNames)
             {
                 var rootPath = Path.Combine(LocalizerEnvironment.BuildRoot, outputPackName);
+                DirectoryUtil.CheckDirectory(rootPath);
+
                 var tmpZipFileName = Path.Combine(rootPath, $"{Guid.NewGuid():n}.zip");
                 using var fileStream = File.Open(tmpZipFileName, FileMode.Create, FileAccess.ReadWrite);
                 using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
@@ -193,4 +199,6 @@ internal partial class Program
             return dic.Values;
         }
     }
+
+    #endregion Private 方法
 }
