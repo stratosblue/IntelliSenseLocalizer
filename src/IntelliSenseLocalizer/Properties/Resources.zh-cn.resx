@@ -157,7 +157,7 @@
     <value>指定.net名称。如 "net6.0"。默认为已安装最高版本的.net。</value>
   </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
-    <value>安装本地化的智能感知文件。（从源文件夹.xml文件到目标SDK包目录）</value>
+    <value>安装本地化的智能感知文件。（从本地安装或在线安装。）</value>
   </data>
   <data name="StringCMDInstallOptionLocaleDescription" xml:space="preserve">
     <value>指定区域。如 "zh-cn"。默认复制所有文件。</value>
@@ -214,15 +214,29 @@
     <value>设置日志等级 0 - 5 。</value>
   </data>
   <data name="StringRootCommandDescription" xml:space="preserve">
-    <value>用于生成本地化智能感知文件的工具
+    <value>用于生成和安装本地化智能感知文件的工具
 示例:
 展示net6.0的Microsoft.NETCore.App中包含'threading'的xml文件:
-.\islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+
 构建net6.0的Microsoft.AspNetCore.App的本地化智能感知文件:
-.\islocalizer build -p Microsoft.AspNetCore.App -m net6.0
+islocalizer build -p Microsoft.AspNetCore.App -m net6.0
+
 安装已构建好的文件 (可能需要以管理员身份运行):
-.\islocalizer install
+islocalizer install
+
 清理构建的缓存:
-.\islocalizer clear cache</value>
+islocalizer clear cache
+
+--------------------------------------------
+
+在自行构建之前，您可以使用以下命令来尝试通过github安装包:
+islocalizer install auto
+
+在命令最后加上参数 -h 即可查看命令的帮助，例如：
+islocalizer install auto -h
+islocalizer cache -h
+
+更多信息请访问：https://github.com/stratosblue/IntelliSenseLocalizer</value>
   </data>
 </root>

@@ -9,9 +9,9 @@
 
   <!--Package Info-->
   <PropertyGroup>
-    <VersionPrefix>1.0.4</VersionPrefix>
+    <VersionPrefix>1.0.5</VersionPrefix>
 
-    <Description>a tool for generate Localized IntelliSense files. 用于生成本地化IntelliSense文件的工具。</Description>
+    <Description>a tool for generate and install Localized IntelliSense files. 用于生成和安装本地化IntelliSense文件的工具。</Description>
 
     <Authors>stratos</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

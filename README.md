@@ -1,5 +1,5 @@
-# IntelliSenseLocalizer [中文](./README.zh-cn.md)
-a tool for generate Localized IntelliSense files. 用于生成本地化IntelliSense文件的工具。
+# IntelliSenseLocalizer [中文文档](./README.zh-cn.md)
+a tool for generate and install Localized IntelliSense files. 用于生成和安装本地化IntelliSense文件的工具。
 
 ## intro
 Before `.net6` we can download the localized .NET IntelliSense files from this page - [Download localized .NET IntelliSense files](https://dotnet.microsoft.com/en-us/download/intellisense). But long after `.net6` was released. This page did not add the localized .NET IntelliSense files for `.net6`. According to this [issue](https://github.com/dotnet/docs/issues/27283) in `dotnet/docs` there is no localized .NET IntelliSense files any more - "`Yes, unfortunately, we will no longer be localizing IntelliSense.`". But the [online docs](https://docs.microsoft.com) has the localized descriptions. So this tool was born.
@@ -15,7 +15,17 @@ Benefit from [online docs](https://docs.microsoft.com)'s nice localization and u
 dotnet tool install -g islocalizer
 ```
 
+#### run `islocalizer -h` to see more command and helps.
+
+Append the argument -h at the end of the command to view the help of the command. eg:
+```shell
+islocalizer install auto -h
+islocalizer cache -h
+```
+
 ### 2. try install Localized IntelliSense files from github
+
+#### View available packs [Releases](https://github.com/stratosblue/IntelliSenseLocalizer/releases)
 
 This command try get the Localized IntelliSense files from github what moniker is `net6.0` and locale is `zh-cn`. And install it:
 
@@ -41,5 +51,3 @@ The archive package will be saved in the default output directory. You can found
 islocalizer install {ArchivePackagePath}
 ```
 `ArchivePackagePath` is the path of the archive package that you builded.
-
-#### run `islocalizer -h` to see more command and helps.

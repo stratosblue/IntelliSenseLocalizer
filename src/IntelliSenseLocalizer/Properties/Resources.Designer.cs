@@ -178,7 +178,7 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
-        ///   查找类似 install the localized intellisense file. (copy all .xml file from source directory to target SDK pack directory) 的本地化字符串。
+        ///   查找类似 install the localized intellisense file. (from local or online.) 的本地化字符串。
         /// </summary>
         internal static string StringCMDInstallDescription {
             get {
@@ -352,13 +352,18 @@ namespace IntelliSenseLocalizer.Properties {
         ///   查找类似 a tool to build and install localize intelliSense file
         ///eg:
         ///show Microsoft.NETCore.App for net6.0 contains &apos;threading&apos; xml files:
-        ///.\islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+        ///islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+        ///
         ///build Microsoft.AspNetCore.App for net6.0 &apos;s localize intelliSense file:
-        ///.\islocalizer build -p Microsoft.AspNetCore.App -m net6.0
+        ///islocalizer build -p Microsoft.AspNetCore.App -m net6.0
+        ///
         ///install the builded files (may need run as administrator):
-        ///.\islocalizer install
+        ///islocalizer install
+        ///
         ///clear the build caches:
-        ///.\islocalizer clear cache 的本地化字符串。
+        ///islocalizer clear cache
+        ///
+        ///--------------------------------------- [字符串的其余部分被截断]&quot;; 的本地化字符串。
         /// </summary>
         internal static string StringRootCommandDescription {
             get {

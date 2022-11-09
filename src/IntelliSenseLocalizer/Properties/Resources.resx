@@ -157,7 +157,7 @@
     <value>select .net moniker. eg: "net6.0". default is the installed latest version.</value>
   </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
-    <value>install the localized intellisense file. (copy all .xml file from source directory to target SDK pack directory)</value>
+    <value>install the localized intellisense file. (from local or online.)</value>
   </data>
   <data name="StringCMDInstallOptionLocaleDescription" xml:space="preserve">
     <value>select locale. eg: "zh-cn". copy all default.</value>
@@ -217,12 +217,26 @@
     <value>a tool to build and install localize intelliSense file
 eg:
 show Microsoft.NETCore.App for net6.0 contains 'threading' xml files:
-.\islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+islocalizer show refs -p Microsoft.NETCore.App -m net6.0 -f threading
+
 build Microsoft.AspNetCore.App for net6.0 's localize intelliSense file:
-.\islocalizer build -p Microsoft.AspNetCore.App -m net6.0
+islocalizer build -p Microsoft.AspNetCore.App -m net6.0
+
 install the builded files (may need run as administrator):
-.\islocalizer install
+islocalizer install
+
 clear the build caches:
-.\islocalizer clear cache</value>
+islocalizer clear cache
+
+--------------------------------------------
+
+before building on your own, you can use the following command to try installing the package through github:
+islocalizer install auto
+
+append the argument -h at the end of the command to view the help of the command. eg：
+islocalizer install auto -h
+islocalizer cache -h
+
+More info at: https://github.com/stratosblue/IntelliSenseLocalizer</value>
   </data>
 </root>

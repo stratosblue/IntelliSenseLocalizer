@@ -1,5 +1,5 @@
 # IntelliSenseLocalizer
-用于生成本地化IntelliSense文件的工具。
+用于生成和安装本地化IntelliSense文件的工具。
 
 ## 简介
 在`.net6`之前，我们可以在这个页面 - [Download localized .NET IntelliSense files](https://dotnet.microsoft.com/en-us/download/intellisense)下载本地化的智能感知文件。但`.net6`发布很长一段时间后，这个页面也没有添加`.net6`的本地化的智能感知文件。根据`dotnet/docs`中的这个[issue](https://github.com/dotnet/docs/issues/27283)，里面说不再提供本地化智能感知文件了 - "`Yes, unfortunately, we will no longer be localizing IntelliSense.`"。但是[在线文档](https://docs.microsoft.com)里面还有本地化描述。所以有了这个工具。
@@ -15,7 +15,17 @@
 dotnet tool install -g islocalizer
 ```
 
+#### 运行 `islocalizer -h` 可以看到更多的命令和帮助信息.
+
+在命令最后加上参数 -h 即可查看命令的帮助，例如：
+```shell
+islocalizer install auto -h
+islocalizer cache -h
+```
+
 ### 2. 尝试从github安装已生成好的智能感知文件
+
+#### 查看可用的包 [Releases](https://github.com/stratosblue/IntelliSenseLocalizer/releases)
 
 这个命令将尝试从github找到并安装`zh-cn`的`net6.0`智能感知包:
 
@@ -41,5 +51,3 @@ islocalizer build -m net6.0
 islocalizer install {ArchivePackagePath}
 ```
 `ArchivePackagePath` 是build命令输出的路径.
-
-#### 运行 `islocalizer -h` 可以看到更多的命令和帮助信息.
