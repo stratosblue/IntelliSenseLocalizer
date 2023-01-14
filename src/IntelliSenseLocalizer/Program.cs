@@ -50,8 +50,14 @@ internal partial class Program
             && int.TryParse(waitSecondsMatch.Groups[1].Value, out var waitSeconds)
             && waitSeconds > 0)
         {
-            Console.WriteLine($"Program will exit at {waitSeconds} seconds later.");
-            Thread.Sleep(waitSeconds * 1000);
+            new Thread(_ =>
+            {
+                Console.WriteLine($"Program will exit at {waitSeconds} seconds later or press enter to exit.");
+                Thread.Sleep(waitSeconds * 1000);
+                Environment.Exit(0);
+            })
+            { IsBackground = true }.Start();
+            Console.ReadLine();
         }
 
         return result;

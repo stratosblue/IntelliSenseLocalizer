@@ -2,6 +2,8 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Compression;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.RegularExpressions;
 
 using Cuture.Http;
@@ -48,42 +50,51 @@ internal partial class Program
 
             autoInstallCommand.SetHandler<string, string, string, ContentCompareType>((string target, string moniker, string locale, ContentCompareType contentCompareType) =>
             {
-                var applicationPacks = DotNetEnvironmentUtil.GetAllApplicationPacks(DotNetEnvironmentUtil.GetSDKPackRoot(target)).ToArray();
-
-                if (applicationPacks.Length == 0)
-                {
-                    WriteMessageAndExit($"no sdk found in \"{target}\"");
-                    return;
-                }
-
-                if (PathAuthorityCheck(target))
-                {
-                    return;
-                }
-
-                if (string.IsNullOrWhiteSpace(moniker))
-                {
-                    var maxVersion = applicationPacks.Max(m => m.Versions.Max(m => m.Version))!;
-                    moniker = applicationPacks.SelectMany(m => m.Versions).Where(m => m.Version == maxVersion).First().Monikers.FirstOrDefault()?.Moniker ?? string.Empty;
-                }
-
-                if (string.IsNullOrWhiteSpace(moniker))
-                {
-                    WriteMessageAndExit("can not select moniker automatic. please specify moniker.");
-                    return;
-                }
-
                 try
                 {
-                    CultureInfo.GetCultureInfo(locale);
-                }
-                catch
-                {
-                    WriteMessageAndExit($"\"{locale}\" is not a effective locale.");
-                    throw;
-                }
+                    var applicationPacks = DotNetEnvironmentUtil.GetAllApplicationPacks(DotNetEnvironmentUtil.GetSDKPackRoot(target)).ToArray();
 
-                InstallFromGithubAsync(target, moniker, locale, contentCompareType).Wait();
+                    if (applicationPacks.Length == 0)
+                    {
+                        WriteMessageAndExit($"no sdk found in \"{target}\"");
+                        return;
+                    }
+
+                    if (PathAuthorityCheck(target))
+                    {
+                        return;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(moniker))
+                    {
+                        var maxVersion = applicationPacks.Max(m => m.Versions.Max(m => m.Version))!;
+                        moniker = applicationPacks.SelectMany(m => m.Versions).Where(m => m.Version == maxVersion).First().Monikers.FirstOrDefault()?.Moniker ?? string.Empty;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(moniker))
+                    {
+                        WriteMessageAndExit("can not select moniker automatic. please specify moniker.");
+                        return;
+                    }
+
+                    try
+                    {
+                        CultureInfo.GetCultureInfo(locale);
+                    }
+                    catch
+                    {
+                        WriteMessageAndExit($"\"{locale}\" is not a effective locale.");
+                        throw;
+                    }
+
+                    InstallFromGithubAsync(target, moniker, locale, contentCompareType).GetAwaiter().GetResult();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Auto install failed: {ex.InnerException ?? ex}");
+                    Console.WriteLine("press any key to continue");
+                    Console.ReadKey();
+                }
             }, targetOption, monikerOption, localeOption, contentCompareTypeOption);
 
             installCommand.Add(autoInstallCommand);
@@ -103,11 +114,34 @@ internal partial class Program
                 WriteMessageAndExit($"Not found {moniker}@{locale}@{contentCompareType} at github. Please build it yourself.");
                 return;
             }
-            await InstallFromUrlAsync(targetAssetsInfo.DownloadUrl, target, targetAssetsInfo.Name);
+            var cacheUrlMd5 = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(targetAssetsInfo.DownloadUrl)));
+            var cacheFile = Path.Combine(LocalizerEnvironment.OutputRoot, $"github_cache_{cacheUrlMd5}_{targetAssetsInfo.Id}_{targetAssetsInfo.Name}");
+
+            //从缓存安装
+            if (File.Exists(cacheFile))
+            {
+                Console.WriteLine($"Install form cache \"{cacheFile}\"");
+                using var fileStream = File.OpenRead(cacheFile);
+                using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read, true);
+                InstallFromZipArchive(target, moniker, locale, zipArchive);
+                return;
+            }
+
+            var data = await InstallFromUrlAsync(targetAssetsInfo.DownloadUrl, target, targetAssetsInfo.Name);
+
+            if (data is not null
+                && !File.Exists(cacheFile))
+            {
+                try
+                {
+                    File.WriteAllBytes(cacheFile, data);
+                }
+                catch { }
+            }
         }
         catch (Exception ex)
         {
-            WriteMessageAndExit($"Load from github fail. {ex.Message}.");
+            Console.WriteLine($"Load from github fail. {ex.Message}.");
             throw;
         }
 
@@ -124,7 +158,7 @@ internal partial class Program
                 }
                 var assets = releases.First(IsLocalizedIntelliSenseFilePacksRelease).GetProperty("assets").EnumerateArray();
 
-                return assets.Select(m => new AssetsInfo(m.GetProperty("name").GetString()!, m.GetProperty("browser_download_url").GetString()!)).ToArray();
+                return assets.Select(m => new AssetsInfo(m.GetProperty("name").GetString()!, m.GetProperty("browser_download_url").GetString()!, m.TryGetProperty("id", out var idNode) ? idNode.ToString() ?? string.Empty : string.Empty)).ToArray();
             }
 
             return Array.Empty<AssetsInfo>();
@@ -136,30 +170,76 @@ internal partial class Program
         }
     }
 
-    private static async Task InstallFromUrlAsync(string downloadUrl, string target, string? fileName = null)
+    private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, string? fileName = null)
     {
         Console.WriteLine($"Start download {downloadUrl}");
 
         //直接内存处理，不缓存了
-        using var httpOperationResult = await downloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).TryGetAsBytesAsync();
+        using var httpRequestExecuteState = await downloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).ExecuteAsync();
 
-        if (httpOperationResult.Exception is not null)
+        using var responseMessage = httpRequestExecuteState.HttpResponseMessage;
+
+        int? length = responseMessage.Content.Headers.TryGetValues(HttpHeaderDefinitions.ContentLength, out var lengths)
+                      ? lengths.Count() == 1
+                        ? int.TryParse(lengths.First(), out var lengthValue) ? lengthValue : null
+                        : null
+                      : null;
+
+        var memeoryStream = new MemoryStream(length ?? 102400);
+        using var responseStream = await responseMessage.Content.ReadAsStreamAsync();
+
+        var buffer = new byte[102400];
+        var lastDisplayTime = DateTime.UtcNow;
+        var lastDisplayValue = 0.0;
+        while (true)
         {
-            throw httpOperationResult.Exception;
+            var readCount = await responseStream.ReadAsync(buffer, 0, buffer.Length);
+            if (readCount == 0)
+            {
+                break;
+            }
+            memeoryStream.Write(buffer, 0, readCount);
+
+            if (length.HasValue
+                && length > 0)
+            {
+                var value = memeoryStream.Length * 100.0 / length.Value;
+                if (lastDisplayTime < DateTime.UtcNow.AddSeconds(-5)
+                    || lastDisplayValue < value - 10)
+                {
+                    Console.WriteLine($"Download progress {value:F2}%");
+                    lastDisplayTime = DateTime.UtcNow;
+                    lastDisplayValue = value;
+                }
+            }
+            else
+            {
+                if (lastDisplayTime < DateTime.UtcNow.AddSeconds(-5)
+                    || lastDisplayValue < memeoryStream.Length - 512 * 1024)
+                {
+                    Console.WriteLine($"Download progress {memeoryStream.Length / 1024.0:F2}kb");
+                    lastDisplayTime = DateTime.UtcNow;
+                    lastDisplayValue = memeoryStream.Length;
+                }
+            }
         }
 
+        Console.WriteLine($"Download completed.");
+
         if ((string.IsNullOrEmpty(fileName)
-             && !TryGetFileName(httpOperationResult.ResponseMessage, out fileName))
+             && !TryGetFileName(responseMessage, out fileName))
             || !TryGetArchivePackageInfo(Path.GetFileNameWithoutExtension(fileName), out var moniker, out var locale, out var contentCompareType))
         {
             WriteMessageAndExit("can not get correct file name.");
-            return;
+            return null;
         }
 
-        var data = httpOperationResult.Data!;
+        var data = memeoryStream.ToArray();
         using var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
 
         InstallFromZipArchive(target, moniker, locale, zipArchive);
+
+        return data;
 
         static bool TryGetFileName(HttpResponseMessage? responseMessage, [NotNullWhen(true)] out string? fileName)
         {
@@ -306,5 +386,5 @@ internal partial class Program
         return Enum.TryParse(seg[2], out contentCompareType);
     }
 
-    private record AssetsInfo(string Name, string DownloadUrl);
+    private record AssetsInfo(string Name, string DownloadUrl, string Id);
 }
