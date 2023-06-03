@@ -1,4 +1,5 @@
 ﻿using IntelliSenseLocalizer;
+
 using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace Microsoft.Extensions.DependencyInjection;

@@ -10,7 +10,7 @@ public static class FileCopyUtil
         }
 
         DirectoryUtil.CheckDirectory(target);
-  
+
         foreach (var sourceFilePath in Directory.EnumerateFiles(source, fileSearchPattern, SearchOption.TopDirectoryOnly))
         {
             if (!filter(sourceFilePath))
