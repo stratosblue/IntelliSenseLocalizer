@@ -8,6 +8,7 @@ using System.Text.RegularExpressions;
 
 using Cuture.Http;
 
+using IntelliSenseLocalizer.Nuget;
 using IntelliSenseLocalizer.Properties;
 
 namespace IntelliSenseLocalizer;
@@ -21,19 +22,21 @@ internal partial class Program
         var installCommand = new Command("install", Resources.StringCMDInstallDescription);
         var sourceOption = new Argument<string>("source", Resources.StringCMDInstallOptionSourceDescription);
         var targetOption = new Option<string>(new[] { "-t", "--target" }, () => LocalizerEnvironment.DefaultSdkRoot, Resources.StringCMDInstallOptionTargetDescription);
+        var copyToNugetGlobalCacheOption = new Option<bool>(new[] { "-ctn", "--copy-to-nuget-global-cache" }, () => false, Resources.StringCMDInstallOptionCopyToNugetGlobalCacheDescription);
 
         installCommand.AddArgument(sourceOption);
         installCommand.AddOption(targetOption);
+        installCommand.AddOption(copyToNugetGlobalCacheOption);
 
-        installCommand.SetHandler((string source, string target) =>
+        installCommand.SetHandler((string source, string target, bool copyToNugetGlobalCache) =>
         {
             if (source.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                InstallFromUrlAsync(source, target, null).Wait();
+                InstallFromUrlAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: null).Wait();
             }
             else
             {
-                InstallFromZipArchiveFile(source, target);
+                InstallFromZipArchiveFile(sourceFile: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
             }
         }, sourceOption, targetOption);
 
@@ -47,8 +50,9 @@ internal partial class Program
             autoInstallCommand.AddOption(monikerOption);
             autoInstallCommand.AddOption(localeOption);
             autoInstallCommand.AddOption(contentCompareTypeOption);
+            autoInstallCommand.AddOption(copyToNugetGlobalCacheOption);
 
-            autoInstallCommand.SetHandler<string, string, string, ContentCompareType>((string target, string moniker, string locale, ContentCompareType contentCompareType) =>
+            autoInstallCommand.SetHandler<string, string, string, ContentCompareType, bool>((string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache) =>
             {
                 try
                 {
@@ -87,7 +91,7 @@ internal partial class Program
                         throw;
                     }
 
-                    InstallFromGithubAsync(target, moniker, locale, contentCompareType).GetAwaiter().GetResult();
+                    InstallFromGithubAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
                 }
                 catch (Exception ex)
                 {
@@ -95,7 +99,7 @@ internal partial class Program
                     Console.WriteLine("press any key to continue");
                     Console.ReadKey();
                 }
-            }, targetOption, monikerOption, localeOption, contentCompareTypeOption);
+            }, targetOption, monikerOption, localeOption, contentCompareTypeOption, copyToNugetGlobalCacheOption);
 
             installCommand.Add(autoInstallCommand);
         }
@@ -103,7 +107,7 @@ internal partial class Program
         return installCommand;
     }
 
-    private static async Task InstallFromGithubAsync(string target, string moniker, string locale, ContentCompareType contentCompareType)
+    private static async Task InstallFromGithubAsync(string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache)
     {
         var contentCompare = contentCompareType.ToString();
         try
@@ -123,11 +127,11 @@ internal partial class Program
                 Console.WriteLine($"Install form cache \"{cacheFile}\"");
                 using var fileStream = File.OpenRead(cacheFile);
                 using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read, true);
-                InstallFromZipArchive(target, moniker, locale, zipArchive);
+                InstallFromZipArchive(target, moniker, locale, zipArchive, copyToNugetGlobalCache);
                 return;
             }
 
-            var data = await InstallFromUrlAsync(targetAssetsInfo.DownloadUrl, target, targetAssetsInfo.Name);
+            var data = await InstallFromUrlAsync(downloadUrl: targetAssetsInfo.DownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: targetAssetsInfo.Name);
 
             if (data is not null
                 && !File.Exists(cacheFile))
@@ -170,7 +174,7 @@ internal partial class Program
         }
     }
 
-    private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, string? fileName = null)
+    private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null)
     {
         Console.WriteLine($"Start download {downloadUrl}");
 
@@ -237,7 +241,7 @@ internal partial class Program
         var data = memeoryStream.ToArray();
         using var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
 
-        InstallFromZipArchive(target, moniker, locale, zipArchive);
+        InstallFromZipArchive(target, moniker, locale, zipArchive, copyToNugetGlobalCache);
 
         return data;
 
@@ -260,7 +264,7 @@ internal partial class Program
         }
     }
 
-    private static void InstallFromZipArchive(string target, string moniker, string locale, ZipArchive zipArchive)
+    private static void InstallFromZipArchive(string target, string moniker, string locale, ZipArchive zipArchive, bool copyToNugetGlobalCache)
     {
         var packRoot = DotNetEnvironmentUtil.GetSDKPackRoot(target);
         if (!Directory.Exists(packRoot))
@@ -280,7 +284,11 @@ internal partial class Program
                                                 .GroupBy(m => m.FullName.Contains('/') ? m.FullName.Split('/', StringSplitOptions.RemoveEmptyEntries)[0] : m.FullName.Split('\\', StringSplitOptions.RemoveEmptyEntries)[0])    //路径分隔符可能为 / 或者 \
                                                 .ToDictionary(m => m.Key, m => m.ToArray(), StringComparer.OrdinalIgnoreCase);
 
+        var filesDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
         var count = 0;
+        var nugetCount = 0;
+
         foreach (var applicationPackRef in applicationPackRefs)
         {
             var packName = applicationPackRef.OwnerMoniker.OwnerVersion.OwnerPack.Name;
@@ -299,14 +307,47 @@ internal partial class Program
                 var targetFile = Path.Combine(rootPath, entry.Name);
                 entry.ExtractToFile(targetFile, true);
                 Console.WriteLine($"Created File: {targetFile}");
+
+                if (copyToNugetGlobalCache)
+                {
+                    filesDictionary.TryAdd(Path.GetFileNameWithoutExtension(entry.Name), targetFile);
+                }
+
                 count++;
             }
         }
 
-        Console.WriteLine($"Install done. {count} item copyed.");
+        if (copyToNugetGlobalCache)
+        {
+            var foundNugetPackageIntelliSenseFiles = GlobalPackagesFinder.EnumeratePackages()
+                                                                         .Where(m => filesDictionary.ContainsKey(m.NormalizedName))
+                                                                         .SelectMany(m => m.Versions)
+                                                                         .SelectMany(m => m.Monikers)
+                                                                         .Where(m => m.Moniker.EqualsOrdinalIgnoreCase(moniker))
+                                                                         .SelectMany(m => m.IntelliSenseFiles)
+                                                                         .Where(m => filesDictionary.ContainsKey(m.PackName))
+                                                                         .ToArray();
+
+
+            foreach (var nugetPackageIntelliSenseFile in foundNugetPackageIntelliSenseFiles)
+            {
+                var rootPath = Path.Combine(Path.GetDirectoryName(nugetPackageIntelliSenseFile.FilePath)!, locale);
+                DirectoryUtil.CheckDirectory(rootPath);
+
+                var sourceFile = filesDictionary[nugetPackageIntelliSenseFile.PackName];
+                var targetFile = Path.Combine(rootPath, nugetPackageIntelliSenseFile.FileName);
+                File.Copy(sourceFile, targetFile, true);
+
+                Console.WriteLine($"Copy To Nuget Cache: {targetFile}");
+
+                nugetCount++;
+            }
+        }
+
+        Console.WriteLine($"Install done. {count} item copyed. {nugetCount} nuget item copyed.");
     }
 
-    private static void InstallFromZipArchiveFile(string sourceFile, string target)
+    private static void InstallFromZipArchiveFile(string sourceFile, string target, bool copyToNugetGlobalCache)
     {
         try
         {
@@ -327,7 +368,7 @@ internal partial class Program
                 WriteMessageAndExit($"open \"{sourceFile}\" fail. confirm the file is a valid archive file.");
                 return;
             }
-            InstallFromZipArchive(target, moniker, locale, zipArchive);
+            InstallFromZipArchive(target, moniker, locale, zipArchive, copyToNugetGlobalCache);
         }
         catch (UnauthorizedAccessException ex)
         {

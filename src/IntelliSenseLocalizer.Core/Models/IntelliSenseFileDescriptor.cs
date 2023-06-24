@@ -1,3 +1,5 @@
-﻿namespace IntelliSenseLocalizer.Models;
+﻿using System.Globalization;
 
-public record class IntelliSenseFileDescriptor(ApplicationPackRefDescriptor OwnerPackRef, string Name, string FileName, string FilePath);
+namespace IntelliSenseLocalizer.Models;
+
+public record class IntelliSenseFileDescriptor(string Name, string FileName, string FilePath, string PackName, string Moniker, CultureInfo? Culture);

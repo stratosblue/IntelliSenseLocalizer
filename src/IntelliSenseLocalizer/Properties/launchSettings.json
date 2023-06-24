@@ -1,12 +1,27 @@
 ﻿{
   "profiles": {
-    "IntelliSenseLocalizer": {
+    "IntelliSenseLocalizer - show": {
       "commandName": "Project",
-      //"commandLineArgs": "[debug] build -p Microsoft.NETCore.App.Ref -m net7.0 -pc 4 -ll 2 -cc 2 -sl \"-------- 以下为原始注释 --------\""
-      //"commandLineArgs": "[debug] show refs"
-      //"commandLineArgs": "[debug] clear build"
-      //"commandLineArgs": "[debug] install auto"
-      //"commandLineArgs": "[debug] uninstall net6.0 zh-cn"
+      "commandLineArgs": "[debug] show refs"
+    },
+    "IntelliSenseLocalizer - build": {
+      "commandName": "Project",
+      "commandLineArgs": "[debug] build -p Microsoft.NETCore.App.Ref -m net7.0 -pc 4 -ll 2 -cc 2 -sl \"-------- 以下为原始注释 --------\""
+    },
+    "IntelliSenseLocalizer - install": {
+      "commandName": "Project",
+      "commandLineArgs": "[debug] install auto -ctn true -cc 2"
+    },
+    "IntelliSenseLocalizer - uninstall": {
+      "commandName": "Project",
+      "commandLineArgs": "[debug] uninstall net6.0 zh-cn"
+    },
+    "IntelliSenseLocalizer - clear": {
+      "commandName": "Project",
+      "commandLineArgs": "[debug] clear build"
+    },
+    "IntelliSenseLocalizer - clean": {
+      "commandName": "Project",
       "commandLineArgs": "[debug] clean"
     }
   }

@@ -1,4 +1,6 @@
-﻿namespace IntelliSenseLocalizer.Models;
+﻿using IntelliSenseLocalizer.Utils;
+
+namespace IntelliSenseLocalizer.Models;
 
 /// <summary>
 /// 描述 C:\Program Files\dotnet\packs\*.App.Ref 例如 C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref
@@ -39,10 +41,7 @@ public class ApplicationPackDescriptor : IEquatable<ApplicationPackDescriptor>
         //loop for file like C:\Program Files\dotnet\packs\Microsoft.NETCore.App.Ref\*
         foreach (var versionPath in Directory.EnumerateDirectories(path, "*", SearchOption.TopDirectoryOnly))
         {
-            var versionString = Path.GetFileName(versionPath);
-            var i = versionString.IndexOf('-');
-            if (i >= 0) versionString = versionString[..i];
-            if (Version.TryParse(versionString, out var version))
+            if (VersionUtil.TryParse(Path.GetFileName(versionPath), out var version))
             {
                 yield return new ApplicationPackVersionDescriptor(applicationPack, version, versionPath);
             }

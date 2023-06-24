@@ -159,6 +159,9 @@
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>install the localized intellisense file. (from local or online.)</value>
   </data>
+  <data name="StringCMDInstallOptionCopyToNugetGlobalCacheDescription" xml:space="preserve">
+    <value>copy the file to the same name package in the Nuget global cache.</value>
+  </data>
   <data name="StringCMDInstallOptionLocaleDescription" xml:space="preserve">
     <value>select locale. eg: "zh-cn". copy all default.</value>
   </data>

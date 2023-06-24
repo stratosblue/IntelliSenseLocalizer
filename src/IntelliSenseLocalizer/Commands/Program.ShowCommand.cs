@@ -63,7 +63,7 @@ internal partial class Program
 
         foreach (var intelliSenseFileDescriptor in query)
         {
-            if (intelliSenseFileDescriptor.OwnerPackRef.Culture is CultureInfo culture)
+            if (intelliSenseFileDescriptor.Culture is CultureInfo culture)
             {
                 Console.WriteLine($"[{intelliSenseFileDescriptor.Name}]({culture}) at [{intelliSenseFileDescriptor.FilePath}]");
             }

@@ -46,7 +46,7 @@ public class ApplicationPackRefDescriptor : IEquatable<ApplicationPackRefDescrip
         {
             var intelliSenseName = Path.GetFileNameWithoutExtension(intelliSenseFilePath);
             var intelliSenseFileName = Path.GetFileName(intelliSenseFilePath);
-            yield return new IntelliSenseFileDescriptor(applicationPackRef, intelliSenseName, intelliSenseFileName, intelliSenseFilePath);
+            yield return new IntelliSenseFileDescriptor(intelliSenseName, intelliSenseFileName, intelliSenseFilePath, applicationPackRef.OwnerMoniker.OwnerVersion.OwnerPack.Name, applicationPackRef.OwnerMoniker.Moniker, applicationPackRef.Culture);
         }
     }
 

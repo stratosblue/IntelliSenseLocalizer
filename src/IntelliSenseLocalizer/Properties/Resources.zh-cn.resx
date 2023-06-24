@@ -159,6 +159,9 @@
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>安装本地化的智能感知文件。（从本地安装或在线安装。）</value>
   </data>
+  <data name="StringCMDInstallOptionCopyToNugetGlobalCacheDescription" xml:space="preserve">
+    <value>将文件复制到Nuget全局缓存的同名包中。</value>
+  </data>
   <data name="StringCMDInstallOptionLocaleDescription" xml:space="preserve">
     <value>指定区域。如 "zh-cn"。默认复制所有文件。</value>
   </data>

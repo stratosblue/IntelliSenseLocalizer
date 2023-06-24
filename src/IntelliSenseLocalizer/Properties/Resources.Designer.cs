@@ -187,6 +187,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 copy the file to the same name package in the Nuget global cache. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDInstallOptionCopyToNugetGlobalCacheDescription {
+            get {
+                return ResourceManager.GetString("StringCMDInstallOptionCopyToNugetGlobalCacheDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 select locale. eg: &quot;zh-cn&quot;. copy all default. 的本地化字符串。
         /// </summary>
         internal static string StringCMDInstallOptionLocaleDescription {

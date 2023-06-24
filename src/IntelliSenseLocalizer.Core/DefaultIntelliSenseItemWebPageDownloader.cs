@@ -32,8 +32,8 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
     {
         var queryKey = memberDescriptor.GetMicrosoftDocsQueryKey();
         var intelliSenseFile = memberDescriptor.IntelliSenseFileDescriptor;
-        var frameworkMoniker = intelliSenseFile.OwnerPackRef.OwnerMoniker.Moniker;
-        var cacheDriectory = Path.Combine(_cacheRoot, intelliSenseFile.OwnerPackRef.OwnerMoniker.OwnerVersion.OwnerPack.Name, frameworkMoniker, _locale);
+        var frameworkMoniker = intelliSenseFile.Moniker;
+        var cacheDriectory = Path.Combine(_cacheRoot, intelliSenseFile.Name, frameworkMoniker, _locale);
         var cacheFilePath = Path.Combine(cacheDriectory, $"{queryKey}.html");
 
         DirectoryUtil.CheckDirectory(cacheDriectory);
