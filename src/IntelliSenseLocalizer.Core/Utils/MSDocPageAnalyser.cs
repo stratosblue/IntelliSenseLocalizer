@@ -76,7 +76,7 @@ public static class MSDocPageAnalyser
                 if (item.NextSibling.NextSibling is HtmlNode { Name: "p" } descNode)
                 {
                     var parameterName = item.SelectSingleNode("./dt").InnerText.Trim();
-                    parameters.Add(parameterName, descNode);
+                    parameters.TryAdd(parameterName, descNode);
                 }
             }
         }
@@ -127,7 +127,7 @@ public static class MSDocPageAnalyser
                             throw new Exception("字段key找不到");
                         }
                         key = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(key);
-                        fields.Add(key, tds.Last());
+                        fields.TryAdd(key, tds.Last());
                     }
                 }
             }
