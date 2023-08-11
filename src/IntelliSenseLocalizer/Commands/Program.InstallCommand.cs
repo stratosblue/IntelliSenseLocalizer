@@ -38,7 +38,7 @@ internal partial class Program
             {
                 InstallFromZipArchiveFile(sourceFile: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
             }
-        }, sourceOption, targetOption);
+        }, sourceOption, targetOption, copyToNugetGlobalCacheOption);
 
         {
             var monikerOption = new Option<string>(new[] { "-m", "--moniker" }, Resources.StringCMDInstallAutoOptionMonikerDescription);
