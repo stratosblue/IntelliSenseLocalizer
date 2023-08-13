@@ -32,7 +32,7 @@ internal partial class Program
         {
             if (source.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                InstallFromUrlAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: null).Wait();
+                InstallFromUrlWithRetryAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: null).Wait();
             }
             else
             {
@@ -131,7 +131,7 @@ internal partial class Program
                 return;
             }
 
-            var data = await InstallFromUrlAsync(downloadUrl: targetAssetsInfo.DownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: targetAssetsInfo.Name);
+            var data = await InstallFromUrlWithRetryAsync(downloadUrl: targetAssetsInfo.DownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: targetAssetsInfo.Name);
 
             if (data is not null
                 && !File.Exists(cacheFile))
@@ -172,6 +172,32 @@ internal partial class Program
                 return jsonElement.GetProperty("name").GetString().EqualsOrdinalIgnoreCase($"{LocalizedIntelliSenseFilePacksReleaseName}-{moniker}");
             }
         }
+    }
+
+    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null, int retryCount = 3)
+    {
+        do
+        {
+            retryCount--;
+            try
+            {
+                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: fileName);
+            }
+            catch (Exception ex)
+            {
+                if (retryCount > 0)
+                {
+                    Console.WriteLine($"Download fail {ex}");
+                    Console.WriteLine("Retry download");
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        } while (retryCount > 0);
+
+        throw new InvalidOperationException("Download error");
     }
 
     private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null)
@@ -327,7 +353,6 @@ internal partial class Program
                                                                          .SelectMany(m => m.IntelliSenseFiles)
                                                                          .Where(m => filesDictionary.ContainsKey(m.PackName))
                                                                          .ToArray();
-
 
             foreach (var nugetPackageIntelliSenseFile in foundNugetPackageIntelliSenseFiles)
             {
