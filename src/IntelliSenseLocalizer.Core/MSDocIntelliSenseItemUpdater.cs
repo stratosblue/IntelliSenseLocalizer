@@ -172,7 +172,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 
         for (int contentIndex = 0; contentIndex < contentLines.Length; contentIndex++)
         {
-            var contentLine = contentLines[contentIndex].Trim();
+            var contentLine = contentLines[contentIndex].Trim().Replace("<br>", "<br/>");
 
             if (contentIndex > 0)
             {
