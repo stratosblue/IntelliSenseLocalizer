@@ -40,12 +40,12 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 
         try
         {
-            var html = await _downloader.DownloadAsync(currentGroupItems.First(), false, default);
+            var (html, url) = await _downloader.DownloadAsync(currentGroupItems.First(), false, default);
 
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(html);
 
-            var analysisResults = MSDocPageAnalyser.AnalysisHtmlDocument(htmlDocument);
+            var analysisResults = MSDocPageAnalyser.AnalysisHtmlDocument(url, htmlDocument);
 
             //原始数据和分析结果都只有一个，直接处理
             if (analysisResults.Length == 1 && currentGroupItems.Length == 1)

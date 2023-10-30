@@ -28,7 +28,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
         _parallelSemaphore.Dispose();
     }
 
-    public async Task<string> DownloadAsync(IntelliSenseItemDescriptor memberDescriptor, bool ignoreCache, CancellationToken cancellationToken = default)
+    public async Task<(string html, string url)> DownloadAsync(IntelliSenseItemDescriptor memberDescriptor, bool ignoreCache, CancellationToken cancellationToken = default)
     {
         var queryKey = memberDescriptor.GetMicrosoftDocsQueryKey();
         var intelliSenseFile = memberDescriptor.IntelliSenseFileDescriptor;
@@ -48,7 +48,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
             {
                 throw NotFoundException();
             }
-            return existedHtml;
+            return (existedHtml, url);
         }
 
         HttpOperationResult<string> response;
@@ -93,7 +93,7 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
 
         await File.WriteAllTextAsync(cacheFilePath, html, cancellationToken);
 
-        return html;
+        return (html, url);
 
         MSOnlineDocNotFoundException NotFoundException()
         {

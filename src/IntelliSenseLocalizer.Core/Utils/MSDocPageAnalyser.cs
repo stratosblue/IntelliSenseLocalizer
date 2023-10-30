@@ -15,7 +15,7 @@ public static class MSDocPageAnalyser
     /// <param name="htmlDocument"></param>
     /// <returns></returns>
     /// <exception cref="Exception"></exception>
-    public static MSDocPageAnalysisResult[] AnalysisHtmlDocument(HtmlDocument htmlDocument)
+    public static MSDocPageAnalysisResult[] AnalysisHtmlDocument(string url, HtmlDocument htmlDocument)
     {
         var htmlRootNode = htmlDocument.DocumentNode;
 
@@ -37,7 +37,7 @@ public static class MSDocPageAnalyser
                                  ?? htmlRootNode.SelectSingleNode("//div[@class=\"content \"]")
                                  ?? htmlRootNode.SelectSingleNode("//div[@class=\"content\"]");
 
-            return new[] { CreatePageAnalysisResult(apiName, memberRootNode) };
+            return new[] { CreatePageAnalysisResult(url, apiName, memberRootNode) };
         }
         else
         {
@@ -51,7 +51,7 @@ public static class MSDocPageAnalyser
                 if (memberNameHolderNode.GetNextTagNode("div") is HtmlNode memberInfoNode
                     && memberInfoNode.GetAttributeValue("class", string.Empty).EqualsOrdinalIgnoreCase("memberInfo"))
                 {
-                    result[i] = CreatePageAnalysisResult(uniqueKey, memberInfoNode);
+                    result[i] = CreatePageAnalysisResult(url, uniqueKey, memberInfoNode);
                 }
             }
 
@@ -59,7 +59,7 @@ public static class MSDocPageAnalyser
         }
     }
 
-    private static MSDocPageAnalysisResult CreatePageAnalysisResult(string uniqueKey, HtmlNode htmlNode)
+    private static MSDocPageAnalysisResult CreatePageAnalysisResult(string url, string uniqueKey, HtmlNode htmlNode)
     {
         var summaryHolderNode = htmlNode.SelectSingleNode("./div[@class=\"summaryHolder\"]");
 
@@ -87,7 +87,7 @@ public static class MSDocPageAnalyser
                             ? tReturnNode
                             : null;
 
-        return new MSDocPageAnalysisResult(uniqueKey, parameters, fields)
+        return new MSDocPageAnalysisResult(url, uniqueKey, parameters, fields)
         {
             SummaryNode = summaryHolderNode,
             ReturnNode = returnNode,

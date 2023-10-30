@@ -4,5 +4,5 @@ namespace IntelliSenseLocalizer;
 
 public interface IIntelliSenseItemWebPageDownloader : IDisposable
 {
-    Task<string> DownloadAsync(IntelliSenseItemDescriptor memberDescriptor, bool ignoreCache, CancellationToken cancellationToken = default);
+    Task<(string html, string url)> DownloadAsync(IntelliSenseItemDescriptor memberDescriptor, bool ignoreCache, CancellationToken cancellationToken = default);
 }
