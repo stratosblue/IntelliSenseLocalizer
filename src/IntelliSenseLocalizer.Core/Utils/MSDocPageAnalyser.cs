@@ -32,8 +32,19 @@ public static class MSDocPageAnalyser
             var apiName = htmlDocument.DocumentNode.SelectSingleNode("//meta[@name=\"APIName\"]").GetAttributeValue("content", "");
 
             apiName = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(apiName);
+            
+            var memberRootNodes = htmlRootNode.SelectNodes( "//div[@class=\"memberInfo\"]" );
+            if( memberRootNodes?.Any() == true )
+            {
+                return 
+                    memberRootNodes.Select( x => {
+                        var id = x.ParentNode.SelectSingleNode( ".//h2[@class=\"memberNameHolder\"]" ).Id;
+                        return CreatePageAnalysisResult( url, IntelliSenseNameUtil.NormalizeNameInHtmlForKey( id ), x );
+                    } ).ToArray();
+            }
 
-            var memberRootNode = htmlRootNode.SelectSingleNode("//div[@class=\"summaryHolder\"]")?.ParentNode
+            var memberRootNode = htmlRootNode.SelectSingleNode("//div[@class=\"content \"]")?.SelectSingleNode(".//div[@class=\"summaryHolder\"]")?.ParentNode
+                                ?? htmlRootNode.SelectSingleNode("//div[@class=\"content\"]")?.SelectSingleNode(".//div[@class=\"summaryHolder\"]")?.ParentNode
                                  ?? htmlRootNode.SelectSingleNode("//div[@class=\"content \"]")
                                  ?? htmlRootNode.SelectSingleNode("//div[@class=\"content\"]");
 
