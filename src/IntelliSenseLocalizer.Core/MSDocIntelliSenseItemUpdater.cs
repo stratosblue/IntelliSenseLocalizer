@@ -99,8 +99,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
             _logger.LogDebug("Not found ref key {RefKey} for {Name}.", refKey, descriptor.OriginName);
             return;
         }
-        linkHtmlNode.RemoveAll();
-        linkHtmlNode.AppendChild(HtmlNode.CreateNode(WebUtility.HtmlEncode(node.OuterXml)));
+        linkHtmlNode.ParentNode.ReplaceChild( HtmlNode.CreateNode(node.OuterXml), linkHtmlNode);
     }
 
     /// <summary>
