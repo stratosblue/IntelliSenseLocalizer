@@ -144,7 +144,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                         ReplaceRefNodeContent(descriptor, refDictionary, linkHtmlNode, linkKey);
                     }
                 }
-                else if (htmlNode.SelectNodes(".//code") is HtmlNodeCollection codeNodes)
+                if (htmlNode.SelectNodes(".//code") is HtmlNodeCollection codeNodes)
                 {
                     foreach (var linkHtmlNode in codeNodes)
                     {
