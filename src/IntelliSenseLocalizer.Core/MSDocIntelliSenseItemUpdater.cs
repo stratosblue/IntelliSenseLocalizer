@@ -67,6 +67,9 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                         continue;
                     }
 
+                    fieldsPageAnalysisResult = new MSDocPageAnalysisResult( fieldsPageAnalysisResult.Url, member.UniqueKey, fieldsPageAnalysisResult.Parameters, fieldsPageAnalysisResult.Fields );
+                    fieldsPageAnalysisResult.SummaryNode = fieldsPageAnalysisResult.Fields[member.UniqueKey];
+
                     UpdateIntelliSenseItem(member, fieldsPageAnalysisResult);
                 }
                 else    //处理方法等成员
@@ -108,7 +111,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
     /// <param name="descriptor"></param>
     /// <param name="element"></param>
     /// <param name="htmlNode"></param>
-    protected virtual void UpdateElementContent(IntelliSenseItemDescriptor descriptor, XmlElement element, HtmlNode htmlNode)
+    protected virtual void UpdateElementContent(IntelliSenseItemDescriptor descriptor, XmlElement element, HtmlNode htmlNode, MSDocPageAnalysisResult? analysisResult = null)
     {
         var originNodes = element.ChildNodes.ToList();
 
@@ -152,11 +155,24 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
             }
         }
 
-        var contentLines = WebUtility.HtmlDecode(htmlNode.InnerText.Trim()).Split('\n');
+        static IEnumerable<HtmlNode> FindNode(HtmlNode _htmlNode)
+        {
+            return _htmlNode.SelectNodes( ".//p" )
+                        ?? _htmlNode.SelectNodes( ".//li" )
+                        ?? (_htmlNode.Name == "p" ? new[] { _htmlNode }.AsEnumerable() : throw new Exception() );
+        }
+
+        var contentLines = FindNode(htmlNode).Select(x => x.InnerHtml).ToArray();
+
+
+        if(analysisResult is not null)
+        {
+            contentLines = FindNode(analysisResult.SummaryNode).Select(x => x.InnerHtml).ToArray();
+        }
 
         for (int contentIndex = 0; contentIndex < contentLines.Length; contentIndex++)
         {
-            var contentLine = contentLines[contentIndex];
+            var contentLine = contentLines[contentIndex].Trim();
 
             if (contentIndex > 0)
             {
@@ -243,7 +259,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                 {
                     if (analysisResult.SummaryNode is not null)
                     {
-                        RunAndLogExceptionsAsDebug(() => UpdateElementsContent(descriptor.Element.GetSummaryNodes(), analysisResult.SummaryNode), $"{descriptor.OriginName}'s Summary Node");
+                        RunAndLogExceptionsAsDebug(() => UpdateElementsContent(descriptor.Element.GetSummaryNodes(), analysisResult.SummaryNode, analysisResult), $"{descriptor.OriginName}'s Summary Node");
                     }
                     else
                     {
@@ -273,12 +289,12 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                 break;
         }
 
-        void UpdateElementsContent(XmlNodeList elements, HtmlNode htmlNode)
+        void UpdateElementsContent(XmlNodeList elements, HtmlNode htmlNode, MSDocPageAnalysisResult? analysisResult = null)
         {
             for (int i = elements.Count - 1; i >= 0; i--)
             {
                 var item = (XmlElement)elements[i]!;
-                UpdateElementContent(descriptor, item, htmlNode);
+                UpdateElementContent(descriptor, item, htmlNode, analysisResult);
             }
         }
     }
