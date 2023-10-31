@@ -159,13 +159,14 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
         {
             return _htmlNode.SelectNodes( ".//p" )
                         ?? _htmlNode.SelectNodes( ".//li" )
-                        ?? (_htmlNode.Name == "p" ? new[] { _htmlNode }.AsEnumerable() : throw new Exception() );
+                        ?? (_htmlNode.Name == "p" ? new[] { _htmlNode }.AsEnumerable() : null )
+                        ?? new []{ HtmlNode.CreateNode( "<p tags=\"emptyNode\" />" ) };
         }
 
         var contentLines = FindNode(htmlNode).Select(x => x.InnerHtml).ToArray();
 
 
-        if(analysisResult is not null)
+        if(analysisResult?.SummaryNode is not null)
         {
             contentLines = FindNode(analysisResult.SummaryNode).Select(x => x.InnerHtml).ToArray();
         }
@@ -267,7 +268,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                     }
 
                     if (descriptor.Element.GetReturnsNodes() is XmlNodeList returnsNodeList
-                        && returnsNodeList.Count > 0)
+                        && returnsNodeList.Count > 0 && returnsNodeList[0]?.InnerText != "")
                     {
                         if (analysisResult.ReturnNode is not null)
                         {
