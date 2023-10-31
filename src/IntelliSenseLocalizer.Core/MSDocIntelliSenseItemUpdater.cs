@@ -45,7 +45,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(html);
 
-            var analysisResults = MSDocPageAnalyser.AnalysisHtmlDocument(url, htmlDocument);
+            var analysisResults = MSDocPageAnalyser.AnalysisHtmlDocument(url, htmlDocument, currentGroupItems);
 
             //原始数据和分析结果都只有一个，直接处理
             if (analysisResults.Length == 1 && currentGroupItems.Length == 1)
