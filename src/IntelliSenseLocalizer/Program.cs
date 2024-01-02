@@ -1,4 +1,5 @@
 ﻿using System.CommandLine;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 using IntelliSenseLocalizer.Properties;
@@ -15,8 +16,11 @@ namespace IntelliSenseLocalizer;
 internal partial class Program
 {
     private static readonly LoggingLevelSwitch s_consoleLoggingLevelSwitch = new(LogEventLevel.Verbose);
+
     private static readonly Option<int?> s_logLevelOption = new(new[] { "-ll", "--log-level" }, Resources.StringOptionLogLevelDescription);
+
     private static Microsoft.Extensions.Logging.ILogger s_logger = null!;
+
     private static IServiceProvider s_serviceProvider = null!;
 
     private static int Main(string[] args)
@@ -50,20 +54,28 @@ internal partial class Program
             && int.TryParse(waitSecondsMatch.Groups[1].Value, out var waitSeconds)
             && waitSeconds > 0)
         {
-            new Thread(_ =>
-            {
-                Console.WriteLine($"Program will exit at {waitSeconds} seconds later or press enter to exit.");
-                Thread.Sleep(waitSeconds * 1000);
-                Environment.Exit(0);
-            })
-            { IsBackground = true }.Start();
-            Console.ReadLine();
+            DelayExitProcess(waitSeconds, 0);
         }
 
         return result;
     }
 
     #region Base
+
+    [DoesNotReturn]
+    private static void DelayExitProcess(int waitSeconds, int exitCode)
+    {
+        new Thread(_ =>
+        {
+            Console.WriteLine($"Program will exit at {waitSeconds} seconds later or press enter to exit.");
+            Thread.Sleep(waitSeconds * 1000);
+            Environment.Exit(exitCode);
+        })
+        { IsBackground = true }
+        .Start();
+        Console.ReadLine();
+        Environment.Exit(exitCode);
+    }
 
     private static ServiceProvider BuildServiceProvider()
     {
@@ -110,10 +122,11 @@ internal partial class Program
         s_consoleLoggingLevelSwitch.MinimumLevel = level;
     }
 
+    [DoesNotReturn]
     private static void WriteMessageAndExit(string message)
     {
         Console.WriteLine(message);
-        Environment.Exit(1);
+        DelayExitProcess(10, 1);
     }
 
     #endregion Base

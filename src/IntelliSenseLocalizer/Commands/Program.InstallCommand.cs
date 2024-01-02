@@ -1,15 +1,13 @@
 ﻿using System.CommandLine;
-using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO.Compression;
-using System.Security.Cryptography;
-using System.Text;
-using System.Text.RegularExpressions;
 
 using Cuture.Http;
 
 using IntelliSenseLocalizer.Nuget;
 using IntelliSenseLocalizer.Properties;
+
+using Microsoft.Extensions.Logging;
 
 namespace IntelliSenseLocalizer;
 
@@ -32,7 +30,7 @@ internal partial class Program
         {
             if (source.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                InstallFromUrlWithRetryAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: null).Wait();
+                InstallFromUrlWithRetryAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache).Wait();
             }
             else
             {
@@ -91,7 +89,7 @@ internal partial class Program
                         throw;
                     }
 
-                    InstallFromGithubAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
+                    InstallFromNugetAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
                 }
                 catch (Exception ex)
                 {
@@ -107,19 +105,75 @@ internal partial class Program
         return installCommand;
     }
 
-    private static async Task InstallFromGithubAsync(string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache)
+    #region nuget.org
+
+    private static async Task InstallFromNugetAsync(string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache)
     {
-        var contentCompare = contentCompareType.ToString();
         try
         {
-            var assetsInfos = await FindAssetsAtReleasesAsync(moniker);
-            if (assetsInfos.FirstOrDefault(m => m.Name.Contains(locale, StringComparison.OrdinalIgnoreCase) && m.Name.Contains(contentCompare, StringComparison.OrdinalIgnoreCase)) is not AssetsInfo targetAssetsInfo)
+            var culture = CultureInfo.GetCultureInfo(locale);
+
+            s_logger.LogInformation("getting nuget index.");
+
+            var nugetIndex = await "https://api.nuget.org/v3/index.json".CreateHttpRequest()
+                                                                        .AutoRedirection(true)
+                                                                        .GetAsDynamicJsonAsync();
+
+            IEnumerable<dynamic> resources = nugetIndex!.resources;
+
+            var searchQueryServiceInfo = resources.First(m => string.Equals("SearchQueryService", m["@type"] as string));
+
+            var searchQueryBaseUrl = searchQueryServiceInfo["@id"] as string;
+
+            s_logger.LogInformation("nuget search query service address {searchQueryBaseUrl}.", searchQueryBaseUrl);
+
+            var searchQueryUrl = $"{searchQueryBaseUrl}?q={NugetPackageName}&skip=0&take=100&prerelease=true&semVerLevel=2.0.0";
+
+            s_logger.LogInformation("querying language pack package.");
+
+            var searchQueryResult = await searchQueryUrl.CreateHttpRequest()
+                                                        .AutoRedirection(true)
+                                                        .GetAsDynamicJsonAsync();
+
+            IEnumerable<dynamic> searchQueryResultItems = searchQueryResult!.data;
+
+            var targetPacakgeInfo = searchQueryResultItems.FirstOrDefault(m => string.Equals(NugetPackageName, m.id as string));
+
+            if (targetPacakgeInfo is null)
             {
-                WriteMessageAndExit($"Not found {moniker}@{locale}@{contentCompareType} at github. Please build it yourself.");
-                return;
+                WriteMessageAndExit("query language pack fail.");
             }
-            var cacheUrlMd5 = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(targetAssetsInfo.DownloadUrl)));
-            var cacheFile = Path.Combine(LocalizerEnvironment.OutputRoot, $"github_cache_{cacheUrlMd5}_{targetAssetsInfo.Id}_{targetAssetsInfo.Name}");
+
+            IEnumerable<dynamic> versions = targetPacakgeInfo.versions;
+
+            var targetVersionInfo = versions.FirstOrDefault(m =>
+            {
+                try
+                {
+                    var versionString = (string)m.version;
+                    var langPackVersion = LangPackVersion.Decode(versionString.Replace(NugetPackageName, string.Empty).TrimStart('.'));
+                    return contentCompareType == langPackVersion.ContentCompareType
+                           && IsAdaptCulture(langPackVersion.Culture, culture);
+                }
+                catch { }
+                return false;
+            });
+
+            if (targetVersionInfo is null)
+            {
+                WriteMessageAndExit($"not found package at nuget.org for [{target} - {moniker} - {locale} - {contentCompareType}]");
+            }
+
+            s_logger.LogInformation("getting language pack package detail.");
+
+            var packgetDetailUrl = (string)targetVersionInfo["@id"];
+            var packageDetailInfo = await packgetDetailUrl.CreateHttpRequest()
+                                                          .AutoRedirection(true)
+                                                          .GetAsDynamicJsonAsync();
+
+            var packageDownloadUrl = (string)packageDetailInfo!.packageContent;
+
+            var cacheFile = Path.Combine(LocalizerEnvironment.OutputRoot, Path.GetFileName(packageDownloadUrl));
 
             //从缓存安装
             if (File.Exists(cacheFile))
@@ -127,11 +181,11 @@ internal partial class Program
                 Console.WriteLine($"Install form cache \"{cacheFile}\"");
                 using var fileStream = File.OpenRead(cacheFile);
                 using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Read, true);
-                InstallFromZipArchive(target, moniker, locale, zipArchive, copyToNugetGlobalCache);
+                InstallFromZipArchive(target, zipArchive, copyToNugetGlobalCache);
                 return;
             }
 
-            var data = await InstallFromUrlWithRetryAsync(downloadUrl: targetAssetsInfo.DownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: targetAssetsInfo.Name);
+            var data = await InstallFromUrlWithRetryAsync(downloadUrl: packageDownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
 
             if (data is not null
                 && !File.Exists(cacheFile))
@@ -145,43 +199,34 @@ internal partial class Program
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Load from github fail. {ex.Message}.");
+            Console.WriteLine($"Load from nuget.org fail. {ex.Message}.");
             throw;
-        }
-
-        static async Task<AssetsInfo[]> FindAssetsAtReleasesAsync(string moniker)
-        {
-            for (int pageIndex = 1; pageIndex < 10; pageIndex++)
-            {
-                var url = $"https://api.github.com/repos/stratosblue/intellisenselocalizer/releases?page={pageIndex}";
-                using var response = await url.CreateHttpRequest().UseUserAgent(UserAgents.EdgeChromium).GetAsJsonDocumentAsync();
-                var releases = response!.RootElement.EnumerateArray();
-                if (!releases.Any(IsLocalizedIntelliSenseFilePacksRelease))
-                {
-                    continue;
-                }
-                var assets = releases.First(IsLocalizedIntelliSenseFilePacksRelease).GetProperty("assets").EnumerateArray();
-
-                return assets.Select(m => new AssetsInfo(m.GetProperty("name").GetString()!, m.GetProperty("browser_download_url").GetString()!, m.TryGetProperty("id", out var idNode) ? idNode.ToString() ?? string.Empty : string.Empty)).ToArray();
-            }
-
-            return Array.Empty<AssetsInfo>();
-
-            bool IsLocalizedIntelliSenseFilePacksRelease(System.Text.Json.JsonElement jsonElement)
-            {
-                return jsonElement.GetProperty("name").GetString().EqualsOrdinalIgnoreCase($"{LocalizedIntelliSenseFilePacksReleaseName}-{moniker}");
-            }
         }
     }
 
-    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null, int retryCount = 3)
+    private static bool IsAdaptCulture(CultureInfo? culture, CultureInfo targetCulture)
+    {
+        if (culture == null)
+        {
+            return false;
+        }
+        if (targetCulture.Equals(culture))
+        {
+            return true;
+        }
+        return IsAdaptCulture(culture.Parent, targetCulture);
+    }
+
+    #endregion nuget.org
+
+    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, int retryCount = 3)
     {
         do
         {
             retryCount--;
             try
             {
-                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, fileName: fileName);
+                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
             }
             catch (Exception ex)
             {
@@ -256,42 +301,39 @@ internal partial class Program
 
         Console.WriteLine($"Download completed.");
 
-        if ((string.IsNullOrEmpty(fileName)
-             && !TryGetFileName(responseMessage, out fileName))
-            || !TryGetArchivePackageInfo(Path.GetFileNameWithoutExtension(fileName), out var moniker, out var locale, out var contentCompareType))
-        {
-            WriteMessageAndExit("can not get correct file name.");
-            return null;
-        }
-
         var data = memeoryStream.ToArray();
         using var zipArchive = new ZipArchive(new MemoryStream(data), ZipArchiveMode.Read, true);
 
-        InstallFromZipArchive(target, moniker, locale, zipArchive, copyToNugetGlobalCache);
+        InstallFromZipArchive(target, zipArchive, copyToNugetGlobalCache);
 
         return data;
-
-        static bool TryGetFileName(HttpResponseMessage? responseMessage, [NotNullWhen(true)] out string? fileName)
-        {
-            fileName = null;
-            if (responseMessage is null)
-            {
-                return false;
-            }
-            var contentDisposition = responseMessage.Headers.GetValues("Content-Disposition").FirstOrDefault() ?? string.Empty;
-
-            if (Regex.Match(contentDisposition, @"filename=(.+?)\.zip") is not Match match
-                || match.Groups.Count < 2)
-            {
-                return false;
-            }
-            fileName = match.Groups[1].Value;
-            return true;
-        }
     }
 
-    private static void InstallFromZipArchive(string target, string moniker, string locale, ZipArchive zipArchive, bool copyToNugetGlobalCache)
+    private static void InstallFromZipArchive(string target, ZipArchive zipArchive, bool copyToNugetGlobalCache)
     {
+        var manifestEntry = zipArchive.GetEntry(LanguagePackManifest.ManifestFileName);
+
+        if (manifestEntry is null)
+        {
+            WriteMessageAndExit($"not found \"{LanguagePackManifest.ManifestFileName}\" in zipArchive.");
+        }
+
+        var contentEntries = zipArchive.Entries.Where(m => m.FullName.StartsWith("content/")).ToList();
+
+        if (contentEntries.Count == 0)
+        {
+            WriteMessageAndExit($"not found intellisense files in zipArchive.");
+        }
+
+        using var manifestStream = manifestEntry.Open();
+        using var manifestStreamReader = new StreamReader(manifestStream);
+        var manifestJson = manifestStreamReader.ReadToEnd();
+
+        var languagePackManifest = LanguagePackManifest.FromJson(manifestJson);
+
+        var locale = languagePackManifest.Culture.Name.ToLowerInvariant();
+        var moniker = languagePackManifest.Moniker;
+
         var packRoot = DotNetEnvironmentUtil.GetSDKPackRoot(target);
         if (!Directory.Exists(packRoot))
         {
@@ -306,9 +348,9 @@ internal partial class Program
                                                        .Where(m => m.Culture is null)
                                                        .ToArray();
 
-        var packEntryGroups = zipArchive.Entries.Where(m => m.Name.IsNotNullOrEmpty())
-                                                .GroupBy(m => m.FullName.Contains('/') ? m.FullName.Split('/', StringSplitOptions.RemoveEmptyEntries)[0] : m.FullName.Split('\\', StringSplitOptions.RemoveEmptyEntries)[0])    //路径分隔符可能为 / 或者 \
-                                                .ToDictionary(m => m.Key, m => m.ToArray(), StringComparer.OrdinalIgnoreCase);
+        var packEntryGroups = contentEntries.Where(m => m.Name.IsNotNullOrEmpty())
+                                            .GroupBy(m => m.FullName.Contains('/') ? m.FullName.Split('/', StringSplitOptions.RemoveEmptyEntries)[1] : m.FullName.Split('\\', StringSplitOptions.RemoveEmptyEntries)[1])    //路径分隔符可能为 / 或者 \
+                                            .ToDictionary(m => m.Key, m => m.ToArray(), StringComparer.OrdinalIgnoreCase);
 
         var filesDictionary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
@@ -376,12 +418,6 @@ internal partial class Program
     {
         try
         {
-            if (!TryGetArchivePackageInfo(Path.GetFileNameWithoutExtension(sourceFile), out var moniker, out var locale, out var contentCompareType))
-            {
-                WriteMessageAndExit("The file name must be moniker@locale@ContentCompareType like net6.0@zh-cn@LocaleFirst.");
-                return;
-            }
-
             using var stream = File.OpenRead(sourceFile);
             ZipArchive zipArchive;
             try
@@ -393,7 +429,7 @@ internal partial class Program
                 WriteMessageAndExit($"open \"{sourceFile}\" fail. confirm the file is a valid archive file.");
                 return;
             }
-            InstallFromZipArchive(target, moniker, locale, zipArchive, copyToNugetGlobalCache);
+            InstallFromZipArchive(target, zipArchive, copyToNugetGlobalCache);
         }
         catch (UnauthorizedAccessException ex)
         {
@@ -451,6 +487,4 @@ internal partial class Program
 
         return Enum.TryParse(seg[2], out contentCompareType);
     }
-
-    private record AssetsInfo(string Name, string DownloadUrl, string Id);
 }

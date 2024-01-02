@@ -1,6 +1,6 @@
 ﻿using System.CommandLine;
+using System.Diagnostics;
 using System.Globalization;
-using System.IO.Compression;
 
 using IntelliSenseLocalizer.Models;
 using IntelliSenseLocalizer.Properties;
@@ -12,6 +12,41 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    private const string PackCsprojFileName = "pack.csproj";
+
+    private const string NugetPackageName = "IntelliSenseLocalizer.LanguagePack";
+
+    private const string PackCsprojContent = $@" <Project Sdk=""Microsoft.NET.Sdk"">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.0</TargetFramework>
+		<IncludeBuildOutput>false</IncludeBuildOutput>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="".\**\*.xml"" Pack=""True"" PackagePath=""content"" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Update=""islocalizer.manifest.json"" Pack=""True"" PackagePath=""/"" />
+	</ItemGroup>
+
+	<!--Package Info-->
+	<PropertyGroup>
+		<Description>Localized IntelliSense files pack. 本地化IntelliSense文件包。</Description>
+
+		<Authors>stratos</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/stratosblue/intellisenselocalizer</PackageProjectUrl>
+
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+
+		<PackageTags>localized-intellisense-files intellisense-files localization-files</PackageTags>
+	</PropertyGroup>
+</Project>
+";
+
     #region Private 方法
 
     private static Command BuildBuildCommand()
@@ -166,22 +201,12 @@ internal partial class Program
             var outputPackNames = refDescriptors.Select(m => $"{m.OwnerMoniker.Moniker}@{locale}@{contentCompareType}").ToHashSet();
             foreach (var outputPackName in outputPackNames)
             {
+                s_logger.LogInformation("start create language pack for {outputPackName}.", outputPackName);
+
                 var rootPath = Path.Combine(LocalizerEnvironment.BuildRoot, outputPackName);
                 DirectoryUtil.CheckDirectory(rootPath);
 
-                var tmpZipFileName = Path.Combine(rootPath, $"{Guid.NewGuid():n}.zip");
-                using var fileStream = File.Open(tmpZipFileName, FileMode.Create, FileAccess.ReadWrite);
-                using var zipArchive = new ZipArchive(fileStream, ZipArchiveMode.Create);
-                foreach (var file in Directory.EnumerateFiles(rootPath, "*.xml", SearchOption.AllDirectories))
-                {
-                    var entryName = file.Replace(rootPath, string.Empty);
-                    zipArchive.CreateEntryFromFile(file, entryName);
-                }
-
-                zipArchive.Dispose();
-                fileStream.Dispose();
-                var finalZipFilePath = Path.Combine(outputRoot, $"{outputPackName}.zip");
-                File.Move(tmpZipFileName, finalZipFilePath, true);
+                var finalZipFilePath = await PackLanguagePackAsync(rootPath, moniker, locale, contentCompareType, outputRoot);
 
                 s_logger.LogWarning("localization pack is saved at {finalZipFilePath}.", finalZipFilePath);
             }
@@ -196,6 +221,40 @@ internal partial class Program
             }
             return dic.Values;
         }
+    }
+
+    private static async Task<string> PackLanguagePackAsync(string sourceRootPath, string moniker, string locale, ContentCompareType contentCompareType, string outputRoot)
+    {
+        var cultureInfo = CultureInfo.GetCultureInfo(locale);
+
+        var packs = Directory.GetDirectories(sourceRootPath).Select(m => Path.GetFileName(m)).ToList();
+
+        var metadata = new Dictionary<string, string>()
+        {
+            { "CreateTime", DateTime.UtcNow.ToString("yyyy-mm-dd HH:mm:ss.fff")},
+        };
+
+        var languagePackManifest = new LanguagePackManifest(LanguagePackManifest.CurrentVersion, moniker, locale, contentCompareType, packs, metadata);
+
+        await File.WriteAllTextAsync(Path.Combine(sourceRootPath, LanguagePackManifest.ManifestFileName), languagePackManifest.ToJson(), default);
+
+        var packCsprojFullName = Path.Combine(sourceRootPath, PackCsprojFileName);
+
+        await File.WriteAllTextAsync(packCsprojFullName, PackCsprojContent, default);
+
+        var langPackVersion = new LangPackVersion(moniker, DateTime.UtcNow, contentCompareType, cultureInfo);
+        var nugetVersion = langPackVersion.Encode();
+
+        using var packProcess = Process.Start("dotnet", $"pack {packCsprojFullName} -o {outputRoot} -c Release --nologo /p:PackageId={NugetPackageName} /p:Version={nugetVersion}");
+
+        await packProcess.WaitForExitAsync();
+
+        if (packProcess.ExitCode != 0)
+        {
+            WriteMessageAndExit($"create package fail with code \"{packProcess.ExitCode}\"");
+        }
+
+        return Path.Combine(outputRoot, $"{NugetPackageName}.{nugetVersion}.nupkg");
     }
 
     #endregion Private 方法

@@ -160,7 +160,7 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
-        ///   查找类似 try install the localized IntelliSense archive from GitHub. 的本地化字符串。
+        ///   查找类似 try install the localized IntelliSense archive from nuget.org. 的本地化字符串。
         /// </summary>
         internal static string StringCMDInstallAutoInstallDescription {
             get {
@@ -219,42 +219,6 @@ namespace IntelliSenseLocalizer.Properties {
         internal static string StringCMDInstallOptionTargetDescription {
             get {
                 return ResourceManager.GetString("StringCMDInstallOptionTargetDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 load archive package source file. 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDLoadArgumentSourceDescription {
-            get {
-                return ResourceManager.GetString("StringCMDLoadArgumentSourceDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 load the localized intellisense file archive package. 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDLoadDescription {
-            get {
-                return ResourceManager.GetString("StringCMDLoadDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 load the localized intellisense file archive package from github (if existed). 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDLoadGithubDescription {
-            get {
-                return ResourceManager.GetString("StringCMDLoadGithubDescription", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   查找类似 archive package extract target path. 的本地化字符串。
-        /// </summary>
-        internal static string StringCMDLoadOptionTargetDescription {
-            get {
-                return ResourceManager.GetString("StringCMDLoadOptionTargetDescription", resourceCulture);
             }
         }
         

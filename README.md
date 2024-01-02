@@ -23,11 +23,11 @@ islocalizer install auto -h
 islocalizer cache -h
 ```
 
-### 2. try install Localized IntelliSense files from github
+### 2. try install Localized IntelliSense files from nuget.org
 
-#### View available packs [Releases](https://github.com/stratosblue/IntelliSenseLocalizer/releases)
+#### View available packs [Nuget](https://www.nuget.org/packages/IntelliSenseLocalizer.LanguagePack)
 
-This command try get the Localized IntelliSense files from github what moniker is `net6.0` and locale is `zh-cn`. And install it:
+This command try get the Localized IntelliSense files from nuget.org what moniker is `net6.0` and locale is `zh-cn`. And install it:
 
 ```shell
 islocalizer install auto -m net6.0 -l zh-cn

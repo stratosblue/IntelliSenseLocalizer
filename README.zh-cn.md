@@ -23,11 +23,11 @@ islocalizer install auto -h
 islocalizer cache -h
 ```
 
-### 2. 尝试从github安装已生成好的智能感知文件
+### 2. 尝试从nuget.org安装已生成好的智能感知文件
 
-#### 查看可用的包 [Releases](https://github.com/stratosblue/IntelliSenseLocalizer/releases)
+#### 查看可用的包 [Nuget](https://www.nuget.org/packages/IntelliSenseLocalizer.LanguagePack)
 
-这个命令将尝试从github找到并安装`zh-cn`的`net6.0`智能感知包:
+这个命令将尝试从nuget.org找到并安装`zh-cn`的`net6.0`智能感知包:
 
 ```shell
 islocalizer install auto -m net6.0 -l zh-cn

@@ -151,7 +151,7 @@
     <value>清理下载或缓存文件。</value>
   </data>
   <data name="StringCMDInstallAutoInstallDescription" xml:space="preserve">
-    <value>尝试从github安装本地化的intellisense文件包。</value>
+    <value>尝试从nuget.org安装本地化的intellisense文件包。</value>
   </data>
   <data name="StringCMDInstallAutoOptionMonikerDescription" xml:space="preserve">
     <value>指定.net名称。如 "net6.0"。默认为已安装最高版本的.net。</value>
@@ -170,18 +170,6 @@
   </data>
   <data name="StringCMDInstallOptionTargetDescription" xml:space="preserve">
     <value>指定安装的目标SDK文件夹。</value>
-  </data>
-  <data name="StringCMDLoadArgumentSourceDescription" xml:space="preserve">
-    <value>要加载的文件压缩包路径。</value>
-  </data>
-  <data name="StringCMDLoadDescription" xml:space="preserve">
-    <value>加载本地化的智能感知文件压缩包。</value>
-  </data>
-  <data name="StringCMDLoadGithubDescription" xml:space="preserve">
-    <value>从github加载本地化的智能感知文件压缩包(如果存在)。</value>
-  </data>
-  <data name="StringCMDLoadOptionTargetDescription" xml:space="preserve">
-    <value>解压文件压缩包的目标路径。</value>
   </data>
   <data name="StringCMDShowDescription" xml:space="preserve">
     <value>查询和展示已安装SDK的更多信息。</value>
@@ -239,6 +227,8 @@ islocalizer install auto
 在命令最后加上参数 -h 即可查看命令的帮助，例如：
 islocalizer install auto -h
 islocalizer cache -h
+
+如果不能正常工作，请尝试使用命令 'dotnet tool update -g islocalizer' 更新此工具后再重试。
 
 更多信息请访问：https://github.com/stratosblue/IntelliSenseLocalizer</value>
   </data>

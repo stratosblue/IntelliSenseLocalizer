@@ -151,7 +151,7 @@
     <value>clear the download or cache files.</value>
   </data>
   <data name="StringCMDInstallAutoInstallDescription" xml:space="preserve">
-    <value>try install the localized IntelliSense archive from GitHub.</value>
+    <value>try install the localized IntelliSense archive from nuget.org.</value>
   </data>
   <data name="StringCMDInstallAutoOptionMonikerDescription" xml:space="preserve">
     <value>select .net moniker. eg: "net6.0". default is the installed latest version.</value>
@@ -170,18 +170,6 @@
   </data>
   <data name="StringCMDInstallOptionTargetDescription" xml:space="preserve">
     <value>set the install target sdk directory.</value>
-  </data>
-  <data name="StringCMDLoadArgumentSourceDescription" xml:space="preserve">
-    <value>load archive package source file.</value>
-  </data>
-  <data name="StringCMDLoadDescription" xml:space="preserve">
-    <value>load the localized intellisense file archive package.</value>
-  </data>
-  <data name="StringCMDLoadGithubDescription" xml:space="preserve">
-    <value>load the localized intellisense file archive package from github (if existed).</value>
-  </data>
-  <data name="StringCMDLoadOptionTargetDescription" xml:space="preserve">
-    <value>archive package extract target path.</value>
   </data>
   <data name="StringCMDShowDescription" xml:space="preserve">
     <value>query and show more installed SDK info.</value>
@@ -239,6 +227,8 @@ islocalizer install auto
 append the argument -h at the end of the command to view the help of the command. eg：
 islocalizer install auto -h
 islocalizer cache -h
+
+if that doesn't work. try use command 'dotnet tool update -g islocalizer' to update this tool and try again.
 
 More info at: https://github.com/stratosblue/IntelliSenseLocalizer</value>
   </data>
