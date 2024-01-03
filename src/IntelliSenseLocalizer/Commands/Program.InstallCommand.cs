@@ -13,8 +13,6 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
-    public const string LocalizedIntelliSenseFilePacksReleaseName = "LocalizedIntelliSenseFilePacks";
-
     private static Command BuildInstallCommand()
     {
         var installCommand = new Command("install", Resources.StringCMDInstallDescription);
@@ -146,7 +144,7 @@ internal partial class Program
 
             IEnumerable<dynamic> versions = targetPacakgeInfo.versions;
 
-            var targetVersionInfo = versions.FirstOrDefault(m =>
+            var targetVersionInfo = versions.Reverse().FirstOrDefault(m =>
             {
                 try
                 {

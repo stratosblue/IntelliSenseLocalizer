@@ -304,6 +304,15 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 islocalizer new version [{0}] found. please use command &apos;dotnet tool update -g islocalizer&apos; to update. 的本地化字符串。
+        /// </summary>
+        internal static string StringNewVersionFoundTip {
+            get {
+                return ResourceManager.GetString("StringNewVersionFoundTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 a regex string for filter result. 的本地化字符串。
         /// </summary>
         internal static string StringOptionFilterDescription {

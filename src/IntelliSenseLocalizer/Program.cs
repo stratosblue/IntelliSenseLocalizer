@@ -1,6 +1,9 @@
 ﻿using System.CommandLine;
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.RegularExpressions;
+
+using Cuture.Http;
 
 using IntelliSenseLocalizer.Properties;
 
@@ -25,6 +28,18 @@ internal partial class Program
 
     private static int Main(string[] args)
     {
+        if (TryCheckNewVersion(out var newVersion))
+        {
+            Console.WriteLine("-----------------------");
+            var colorBackup = Console.ForegroundColor;
+            Console.ForegroundColor = ConsoleColor.Yellow;
+            Console.WriteLine(string.Format(Resources.StringNewVersionFoundTip, newVersion.ToString()));
+            Console.ForegroundColor = colorBackup;
+            Console.WriteLine("-----------------------");
+        }
+
+        _ = TryGetNewVersionOnlineAsync();
+
         s_serviceProvider = BuildServiceProvider();
         s_logger = s_serviceProvider.GetRequiredService<ILogger<Program>>();
 
@@ -130,4 +145,105 @@ internal partial class Program
     }
 
     #endregion Base
+
+    #region new version check
+
+    private static readonly string s_newVersionCacheFilePath = Path.Combine(LocalizerEnvironment.CacheRoot, "new_version");
+
+    private static bool TryGetCurrentVersion([NotNullWhen(true)] out Version? version)
+    {
+        var currentVersionString = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+
+        if (currentVersionString is null
+            || !Version.TryParse(currentVersionString.Split('-')[0], out version))
+        {
+            version = null;
+            return false;
+        }
+        return true;
+    }
+
+    private static bool TryCheckNewVersion([NotNullWhen(true)] out Version? newVersion)
+    {
+        try
+        {
+            if (TryGetCurrentVersion(out var currentVersion)
+                && File.Exists(s_newVersionCacheFilePath)
+                && Version.TryParse(File.ReadAllText(s_newVersionCacheFilePath), out var onlineVersion)
+                && onlineVersion > currentVersion)
+            {
+                newVersion = onlineVersion;
+                return true;
+            }
+        }
+        catch (Exception ex)
+        {
+            s_logger.LogDebug(ex, "check new version fail.");
+        }
+        newVersion = null;
+        return false;
+    }
+
+    private static async Task TryGetNewVersionOnlineAsync()
+    {
+        try
+        {
+            if (!TryGetCurrentVersion(out var currentVersion))
+            {
+                return;
+            }
+
+            var nugetIndex = await "https://api.nuget.org/v3/index.json".CreateHttpRequest()
+                                                                        .AutoRedirection(true)
+                                                                        .GetAsDynamicJsonAsync();
+
+            IEnumerable<dynamic> resources = nugetIndex!.resources;
+
+            var searchQueryServiceInfo = resources.FirstOrDefault(m => string.Equals("SearchQueryService", m["@type"] as string));
+
+            if (searchQueryServiceInfo is null)
+            {
+                return;
+            }
+
+            var searchQueryBaseUrl = searchQueryServiceInfo["@id"] as string;
+
+            var searchQueryUrl = $"{searchQueryBaseUrl}?q=islocalizer&skip=0&take=10&prerelease=false&semVerLevel=2.0.0";
+
+            var searchQueryResult = await searchQueryUrl.CreateHttpRequest()
+                                                        .AutoRedirection(true)
+                                                        .GetAsDynamicJsonAsync();
+
+            if (searchQueryResult is null)
+            {
+                return;
+            }
+
+            IEnumerable<dynamic> searchQueryResultItems = searchQueryResult.data;
+
+            var targetPacakgeInfo = searchQueryResultItems.FirstOrDefault(m => string.Equals("islocalizer", m.id as string));
+
+            if (targetPacakgeInfo is null)
+            {
+                return;
+            }
+
+            IEnumerable<dynamic> versions = targetPacakgeInfo.versions;
+
+            var newVersion = versions.Reverse().FirstOrDefault(m => Version.TryParse(m.version as string, out var version) && version > currentVersion);
+
+            if (newVersion is null)
+            {
+                return;
+            }
+
+            await File.WriteAllTextAsync(s_newVersionCacheFilePath, newVersion.version as string);
+        }
+        catch (Exception ex)
+        {
+            s_logger.LogDebug(ex, "get new version online fail.");
+        }
+    }
+
+    #endregion new version check
 }

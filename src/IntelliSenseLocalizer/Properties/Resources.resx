@@ -198,6 +198,9 @@
   <data name="StringCMDUnInstallOptionTargetDescription" xml:space="preserve">
     <value>set the uninstall target sdk directory.</value>
   </data>
+  <data name="StringNewVersionFoundTip" xml:space="preserve">
+    <value>islocalizer new version [{0}] found. please use command 'dotnet tool update -g islocalizer' to update.</value>
+  </data>
   <data name="StringOptionFilterDescription" xml:space="preserve">
     <value>a regex string for filter result.</value>
   </data>

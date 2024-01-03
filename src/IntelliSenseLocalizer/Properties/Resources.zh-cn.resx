@@ -198,6 +198,9 @@
   <data name="StringCMDUnInstallOptionTargetDescription" xml:space="preserve">
     <value>指定卸载的目标SDK文件夹。</value>
   </data>
+  <data name="StringNewVersionFoundTip" xml:space="preserve">
+    <value>发现 islocalizer 新版本 [{0}]。 请使用命令 'dotnet tool update -g islocalizer' 进行更新。</value>
+  </data>
   <data name="StringOptionFilterDescription" xml:space="preserve">
     <value>用于过滤结果的正则字符串。</value>
   </data>
