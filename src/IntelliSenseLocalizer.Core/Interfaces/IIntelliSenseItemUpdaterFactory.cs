@@ -1,6 +1,4 @@
-﻿using System.Globalization;
-
-namespace IntelliSenseLocalizer;
+﻿namespace IntelliSenseLocalizer;
 
 public interface IIntelliSenseItemUpdaterFactory
 {

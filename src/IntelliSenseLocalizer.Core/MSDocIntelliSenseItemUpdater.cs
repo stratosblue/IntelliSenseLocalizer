@@ -1,5 +1,4 @@
-﻿using System.Net;
-using System.Xml;
+﻿using System.Xml;
 
 using HtmlAgilityPack;
 
@@ -16,10 +15,15 @@ namespace IntelliSenseLocalizer;
 public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 {
     private readonly ContentCompareType _contentCompareType;
+
     private readonly IIntelliSenseItemWebPageDownloader _downloader;
+
     private readonly GenerateContext _generateContext;
+
     private readonly ILogger _logger;
+
     private readonly string? _separateLine;
+
     private bool _disposedValue;
 
     public MSDocIntelliSenseItemUpdater(GenerateContext generateContext, ILogger logger)
@@ -67,7 +71,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
                         continue;
                     }
 
-                    fieldsPageAnalysisResult = new MSDocPageAnalysisResult( fieldsPageAnalysisResult.Url, member.UniqueKey, fieldsPageAnalysisResult.Parameters, fieldsPageAnalysisResult.Fields );
+                    fieldsPageAnalysisResult = new MSDocPageAnalysisResult(fieldsPageAnalysisResult.Url, member.UniqueKey, fieldsPageAnalysisResult.Parameters, fieldsPageAnalysisResult.Fields);
                     fieldsPageAnalysisResult.SummaryNode = fieldsPageAnalysisResult.Fields[member.UniqueKey];
 
                     UpdateIntelliSenseItem(member, fieldsPageAnalysisResult);
@@ -102,7 +106,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
             _logger.LogDebug("Not found ref key {RefKey} for {Name}.", refKey, descriptor.OriginName);
             return;
         }
-        linkHtmlNode.ParentNode.ReplaceChild( HtmlNode.CreateNode(node.OuterXml), linkHtmlNode);
+        linkHtmlNode.ParentNode.ReplaceChild(HtmlNode.CreateNode(node.OuterXml), linkHtmlNode);
     }
 
     /// <summary>
@@ -157,16 +161,15 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 
         static IEnumerable<HtmlNode> FindNode(HtmlNode _htmlNode)
         {
-            return _htmlNode.SelectNodes( ".//p" )
-                        ?? _htmlNode.SelectNodes( ".//li" )
-                        ?? (_htmlNode.Name == "p" ? new[] { _htmlNode }.AsEnumerable() : null )
-                        ?? new []{ HtmlNode.CreateNode( "<p tags=\"emptyNode\" />" ) };
+            return _htmlNode.SelectNodes(".//p")
+                        ?? _htmlNode.SelectNodes(".//li")
+                        ?? (_htmlNode.Name == "p" ? new[] { _htmlNode }.AsEnumerable() : null)
+                        ?? new[] { HtmlNode.CreateNode("<p tags=\"emptyNode\" />") };
         }
 
         var contentLines = FindNode(htmlNode).Select(x => x.InnerHtml).ToArray();
 
-
-        if(analysisResult?.SummaryNode is not null)
+        if (analysisResult?.SummaryNode is not null)
         {
             contentLines = FindNode(analysisResult.SummaryNode).Select(x => x.InnerHtml).ToArray();
         }

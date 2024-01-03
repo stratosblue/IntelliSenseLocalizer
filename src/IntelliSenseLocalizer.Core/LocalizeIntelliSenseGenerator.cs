@@ -39,7 +39,9 @@ public class GenerateContext
 public class LocalizeIntelliSenseGenerator
 {
     private readonly IIntelliSenseItemProvider _intelliSenseItemProvider;
+
     private readonly IIntelliSenseItemUpdaterFactory _intelliSenseItemUpdaterFactory;
+
     private readonly ILogger _logger;
 
     public LocalizeIntelliSenseGenerator(IIntelliSenseItemProvider intelliSenseItemProvider,

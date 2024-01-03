@@ -9,8 +9,11 @@ namespace IntelliSenseLocalizer;
 public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItemWebPageDownloader
 {
     public const string NotFoundPageContent = "404NotFound";
+
     private readonly string _cacheRoot;
+
     private readonly string _locale;
+
     private readonly SemaphoreSlim _parallelSemaphore;
 
     public DefaultIntelliSenseItemWebPageDownloader(CultureInfo cultureInfo, string cacheRoot, int parallelCount)

@@ -39,14 +39,15 @@ public static class MSDocPageAnalyser
 
             var memberRootNodes = htmlRootNode.SelectNodes("//div[@class=\"memberInfo\"]")?
                                     .Where(x => x.ParentNode.Attributes["data-moniker"].Value.Split(" ").Any(z => z.EndsWith(version)));
-            if( memberRootNodes?.Any() == true )
+            if (memberRootNodes?.Any() == true)
             {
-                return memberRootNodes.Select( x => {
-                        var id = x.ParentNode.SelectSingleNode(".//h2[@class=\"memberNameHolder\"]").Id;
-                        var uniqueKey = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(id);
+                return memberRootNodes.Select(x =>
+                {
+                    var id = x.ParentNode.SelectSingleNode(".//h2[@class=\"memberNameHolder\"]").Id;
+                    var uniqueKey = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(id);
 
-                        return CreatePageAnalysisResult(url, uniqueKey, x, intelliSenseItems);
-                    } ).ToArray();
+                    return CreatePageAnalysisResult(url, uniqueKey, x, intelliSenseItems);
+                }).ToArray();
             }
 
             var memberRootNode = htmlRootNode.SelectSingleNode("//div[@class=\"content \"]")?.SelectSingleNode(".//div[@class=\"summaryHolder\"]")?.ParentNode
@@ -90,24 +91,25 @@ public static class MSDocPageAnalyser
         {
             foreach (var item in parameterNodes)
             {
-                var parameterName = item.SelectNodes("./dt/span")?.FirstOrDefault(x => {
-                                        var version = intelliSenseItems.First().IntelliSenseFileDescriptor.Moniker[^3..];
-                                        return x.Attributes["data-moniker"].Value.Split(" ").Any(z => z.EndsWith(version));
-                                    } )?.InnerText.Trim();
+                var parameterName = item.SelectNodes("./dt/span")?.FirstOrDefault(x =>
+                {
+                    var version = intelliSenseItems.First().IntelliSenseFileDescriptor.Moniker[^3..];
+                    return x.Attributes["data-moniker"].Value.Split(" ").Any(z => z.EndsWith(version));
+                })?.InnerText.Trim();
 
                 parameterName ??= item.SelectSingleNode("./dt").InnerText.Trim();
 
                 var descNodes = item.SelectNodes(".//following-sibling::p");
-                if(descNodes?.Any() == true)
+                if (descNodes?.Any() == true)
                 {
-                    if(descNodes.Count == 1)
+                    if (descNodes.Count == 1)
                     {
                         parameters.TryAdd(parameterName, descNodes[0]);
                     }
                     else
                     {
                         var newNode = HtmlNode.CreateNode("<span></span>");
-                            newNode.AppendChildren( descNodes );
+                        newNode.AppendChildren(descNodes);
 
                         parameters.TryAdd(parameterName, newNode);
                     }
@@ -119,24 +121,27 @@ public static class MSDocPageAnalyser
             }
         }
 
-        var currentGroupItem = intelliSenseItems.FirstOrDefault(x => {
-                                    return x.Element.GetParamNodes().Cast<XmlElement>()
-                                                    .Concat(x.Element.GetTypeParamNodes().Cast<XmlElement>())
-                                                    .Select(z => z.Attributes["name"]?.Value)
-                                                    .OrderBy(z => z)
-                                                    .SequenceEqual(parameters.Keys.OrderBy(z => z));
-                                } ) 
-                                ?? intelliSenseItems.FirstOrDefault( x => {
+        var currentGroupItem = intelliSenseItems.FirstOrDefault(x =>
+        {
+            return x.Element.GetParamNodes().Cast<XmlElement>()
+                            .Concat(x.Element.GetTypeParamNodes().Cast<XmlElement>())
+                            .Select(z => z.Attributes["name"]?.Value)
+                            .OrderBy(z => z)
+                            .SequenceEqual(parameters.Keys.OrderBy(z => z));
+        })
+                                ?? intelliSenseItems.FirstOrDefault(x =>
+                                {
                                     return x.Element.GetParamNodes().Cast<XmlElement>()
                                                     .Concat(x.Element.GetTypeParamNodes().Cast<XmlElement>())
                                                     .Select(z => z.Attributes["name"]?.Value)
                                                     .OrderBy(z => z)
                                                     .SequenceEqual(parameters.Where(z => z.Value.Attributes["tags"]?.Value != "emptyNode").Select(z => z.Key).OrderBy(z => z));
-                                } );
+                                });
 
         var returnNode = (HtmlNode?)null;
 
-        if(currentGroupItem?.Element.GetReturnsNodes().Count > 0) {
+        if (currentGroupItem?.Element.GetReturnsNodes().Count > 0)
+        {
             returnNode = htmlNode.SelectSingleNode("./dl[@class=\"propertyInfo\"]/following-sibling::p")
 
                         ?? htmlNode.SelectNodes(".//h4")

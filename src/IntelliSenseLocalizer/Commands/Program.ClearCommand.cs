@@ -59,9 +59,13 @@ internal partial class Program
     private enum ClearType
     {
         All = 1,
+
         Cache = 1 << 1,
+
         Output = 1 << 2,
+
         Logs = 1 << 3,
+
         Build = 1 << 4,
     }
 }
