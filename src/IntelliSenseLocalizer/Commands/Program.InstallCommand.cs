@@ -151,6 +151,7 @@ internal partial class Program
                     var versionString = (string)m.version;
                     var langPackVersion = LangPackVersion.Decode(versionString.Replace(NugetPackageName, string.Empty).TrimStart('.'));
                     return contentCompareType == langPackVersion.ContentCompareType
+                           && langPackVersion.Moniker.EqualsOrdinalIgnoreCase(moniker)
                            && IsAdaptCulture(langPackVersion.Culture, culture);
                 }
                 catch { }
