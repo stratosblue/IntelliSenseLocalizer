@@ -1,25 +1,25 @@
 ﻿<Project>
-  <PropertyGroup>
-		<TargetFrameworks>net6.0;net7.0;net8.0</TargetFrameworks>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+	<PropertyGroup>
+		<TargetFrameworks>net6.0</TargetFrameworks>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 
-    <LangVersion>latest</LangVersion>
-  </PropertyGroup>
+		<LangVersion>latest</LangVersion>
+	</PropertyGroup>
 
-  <!--Package Info-->
-  <PropertyGroup>
-    <VersionPrefix>1.1.3</VersionPrefix>
+	<!--Package Info-->
+	<PropertyGroup>
+		<VersionPrefix>1.1.4</VersionPrefix>
 
-    <Description>a tool for generate and install Localized IntelliSense files. 用于生成和安装本地化IntelliSense文件的工具。</Description>
+		<Description>a tool for generate and install Localized IntelliSense files. 用于生成和安装本地化IntelliSense文件的工具。</Description>
 
-    <Authors>stratos</Authors>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageProjectUrl>https://github.com/stratosblue/intellisenselocalizer</PackageProjectUrl>
+		<Authors>stratos</Authors>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<PackageProjectUrl>https://github.com/stratosblue/intellisenselocalizer</PackageProjectUrl>
 
-    <RepositoryType>git</RepositoryType>
-    <RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<RepositoryUrl>$(PackageProjectUrl)</RepositoryUrl>
 
-    <PackageTags>localized-intellisense;intellisense;localization</PackageTags>
-  </PropertyGroup>
+		<PackageTags>localized-intellisense;intellisense;localization</PackageTags>
+	</PropertyGroup>
 </Project>

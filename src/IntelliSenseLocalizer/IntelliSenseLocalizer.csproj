@@ -8,6 +8,8 @@
 		<ToolCommandName>islocalizer</ToolCommandName>
 		<AssemblyName>islocalizer</AssemblyName>
 
+		<RollForward>LatestMajor</RollForward>
+		
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 
