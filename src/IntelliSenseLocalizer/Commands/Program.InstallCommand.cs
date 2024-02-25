@@ -209,6 +209,10 @@ internal partial class Program
         {
             return false;
         }
+        if (culture.Equals(CultureInfo.InvariantCulture))
+        {
+            return false;
+        }
         if (targetCulture.Equals(culture))
         {
             return true;
