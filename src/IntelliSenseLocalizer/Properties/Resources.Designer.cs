@@ -268,6 +268,69 @@ namespace IntelliSenseLocalizer.Properties {
         }
         
         /// <summary>
+        ///   查找类似 translate the target xml file to target locales. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 the target xml file. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateOptionFileDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateOptionFileDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 specify the source xml locale. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateOptionFromLocaleDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateOptionFromLocaleDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 the trasnlate traget locales. (use ; between multiple values) 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateOptionLocalesDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateOptionLocalesDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 the output root directory. the target locales will has a subdirectory at there. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateOptionOutputDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateOptionOutputDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 set whether the current mode is patch mode. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateOptionPatchDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateOptionPatchDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   查找类似 the translate server endpoint address. 的本地化字符串。
+        /// </summary>
+        internal static string StringCMDTranslateOptionServerDescription {
+            get {
+                return ResourceManager.GetString("StringCMDTranslateOptionServerDescription", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   查找类似 select locale. eg: &quot;zh-cn&quot;. 的本地化字符串。
         /// </summary>
         internal static string StringCMDUnInstallArgumentLocaleDescription {

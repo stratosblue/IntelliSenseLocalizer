@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFrameworks>net8.0</TargetFrameworks>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <PublishAot>true</PublishAot>
+    <UserSecretsId>2820eba5-0608-4c7e-98a3-ea6c628a42a4</UserSecretsId>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(PublishAot)' == 'true' and '$(Configuration)' == 'Release' and '$(RuntimeIdentifier)' != ''">
+    <AotPublishing>true</AotPublishing>
+    <DefineConstants>$(DefineConstants);AOT_PUBLISHING</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(AotPublishing)' != 'true'">
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.*" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+    <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AlibabaCloud.SDK.Alimt20190107" Version="1.0.0" />
+  </ItemGroup>
+</Project>

@@ -1,5 +1,20 @@
-# 如果要从更高级别的目录继承 .editorconfig 设置，请删除以下行
+﻿# 如果要从更高级别的目录继承 .editorconfig 设置，请删除以下行
 root = true
+
+[*]
+charset = utf-8-bom
+end_of_line = crlf
+indent_style = space
+insert_final_newline = true
+trim_trailing_whitespace = true
+dotnet_style_qualification_for_field = false:silent
+dotnet_style_qualification_for_property = false:silent
+dotnet_style_qualification_for_method = false:silent
+dotnet_style_qualification_for_event = false:silent
+dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
+indent_size = 4
+tab_width = 4
+dotnet_style_operator_placement_when_wrapping = beginning_of_line
 
 # c# 文件
 [*.cs]
@@ -8,64 +23,65 @@ root = true
 
 # 缩进和间距
 indent_size = 4
-indent_style = space
 tab_width = 4
-
-# 新行首选项
-end_of_line = crlf
-insert_final_newline = true
 
 #### .NET 编码约定 ####
 
 # 组织 Using
-dotnet_separate_import_directive_groups = true
+dotnet_separate_import_directive_groups = false
 dotnet_sort_system_directives_first = true
 file_header_template = unset
 
 # this. 和 Me. 首选项
-dotnet_style_qualification_for_event = false:silent
-dotnet_style_qualification_for_field = false:silent
-dotnet_style_qualification_for_method = false:silent
-dotnet_style_qualification_for_property = false:silent
+dotnet_style_qualification_for_event = false
+dotnet_style_qualification_for_field = false
+dotnet_style_qualification_for_method = false
+dotnet_style_qualification_for_property = false
 
 # 语言关键字与 bcl 类型首选项
-dotnet_style_predefined_type_for_locals_parameters_members = true:silent
-dotnet_style_predefined_type_for_member_access = true:silent
+dotnet_style_predefined_type_for_locals_parameters_members = true
+dotnet_style_predefined_type_for_member_access = true
 
 # 括号首选项
-dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_other_binary_operators = always_for_clarity:silent
-dotnet_style_parentheses_in_other_operators = never_if_unnecessary:silent
-dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity:silent
+dotnet_style_parentheses_in_arithmetic_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_binary_operators = always_for_clarity
+dotnet_style_parentheses_in_other_operators = never_if_unnecessary
+dotnet_style_parentheses_in_relational_binary_operators = always_for_clarity
 
 # 修饰符首选项
-dotnet_style_require_accessibility_modifiers = for_non_interface_members:silent
+dotnet_style_require_accessibility_modifiers = for_non_interface_members
 
 # 表达式级首选项
-dotnet_style_coalesce_expression = true:suggestion
-dotnet_style_collection_initializer = true:suggestion
-dotnet_style_explicit_tuple_names = true:suggestion
-dotnet_style_null_propagation = true:suggestion
-dotnet_style_object_initializer = true:suggestion
+dotnet_style_coalesce_expression = true
+dotnet_style_collection_initializer = true
+dotnet_style_explicit_tuple_names = true
+dotnet_style_namespace_match_folder = true
+dotnet_style_null_propagation = true
+dotnet_style_object_initializer = true
 dotnet_style_operator_placement_when_wrapping = beginning_of_line
-dotnet_style_prefer_auto_properties = true:silent
-dotnet_style_prefer_compound_assignment = true:suggestion
-dotnet_style_prefer_conditional_expression_over_assignment = true:silent
-dotnet_style_prefer_conditional_expression_over_return = true:silent
-dotnet_style_prefer_inferred_anonymous_type_member_names = true:suggestion
-dotnet_style_prefer_inferred_tuple_names = true:suggestion
-dotnet_style_prefer_is_null_check_over_reference_equality_method = true:suggestion
-dotnet_style_prefer_simplified_boolean_expressions = true:suggestion
-dotnet_style_prefer_simplified_interpolation = true:suggestion
+dotnet_style_prefer_auto_properties = true
+dotnet_style_prefer_compound_assignment = true
+dotnet_style_prefer_conditional_expression_over_assignment = true
+dotnet_style_prefer_conditional_expression_over_return = true
+dotnet_style_prefer_foreach_explicit_cast_in_source = when_strongly_typed
+dotnet_style_prefer_inferred_anonymous_type_member_names = true
+dotnet_style_prefer_inferred_tuple_names = true
+dotnet_style_prefer_is_null_check_over_reference_equality_method = true
+dotnet_style_prefer_simplified_boolean_expressions = true
+dotnet_style_prefer_simplified_interpolation = true
 
 # 字段首选项
-dotnet_style_readonly_field = true:suggestion
+dotnet_style_readonly_field = true
 
 # 参数首选项
-dotnet_code_quality_unused_parameters = all:suggestion
+dotnet_code_quality_unused_parameters = all
 
 # 禁止显示首选项
-dotnet_remove_unnecessary_suppression_exclusions = none
+dotnet_remove_unnecessary_suppression_exclusions = 0
+
+# 新行首选项
+dotnet_style_allow_multiple_blank_lines_experimental = true
+dotnet_style_allow_statement_immediately_after_block_experimental = true
 
 #### c# 编码约定 ####
 
@@ -85,36 +101,50 @@ csharp_style_expression_bodied_operators = false:silent
 csharp_style_expression_bodied_properties = true:silent
 
 # 模式匹配首选项
-csharp_style_pattern_matching_over_as_with_null_check = true:suggestion
-csharp_style_pattern_matching_over_is_with_cast_check = true:suggestion
-csharp_style_prefer_not_pattern = true:suggestion
-csharp_style_prefer_pattern_matching = true:silent
-csharp_style_prefer_switch_expression = true:suggestion
+csharp_style_pattern_matching_over_as_with_null_check = true
+csharp_style_pattern_matching_over_is_with_cast_check = true
+csharp_style_prefer_extended_property_pattern = true
+csharp_style_prefer_not_pattern = true
+csharp_style_prefer_pattern_matching = true
+csharp_style_prefer_switch_expression = true
 
 # Null 检查首选项
 csharp_style_conditional_delegate_call = true:suggestion
 
 # 修饰符首选项
 csharp_prefer_static_local_function = true:suggestion
-csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async:silent
+csharp_preferred_modifier_order = public,private,protected,internal,static,extern,new,virtual,abstract,sealed,override,readonly,unsafe,volatile,async
+csharp_style_prefer_readonly_struct = true
 
 # 代码块首选项
 csharp_prefer_braces = true:silent
 csharp_prefer_simple_using_statement = true:suggestion
+csharp_style_namespace_declarations = file_scoped:suggestion
+csharp_style_prefer_method_group_conversion = true:silent
+csharp_style_prefer_top_level_statements = true:silent
 
 # 表达式级首选项
-csharp_prefer_simple_default_expression = true:suggestion
-csharp_style_deconstructed_variable_declaration = true:suggestion
-csharp_style_inlined_variable_declaration = true:suggestion
-csharp_style_pattern_local_over_anonymous_function = true:suggestion
-csharp_style_prefer_index_operator = true:suggestion
-csharp_style_prefer_range_operator = true:suggestion
-csharp_style_throw_expression = true:suggestion
-csharp_style_unused_value_assignment_preference = discard_variable:suggestion
-csharp_style_unused_value_expression_statement_preference = discard_variable:silent
+csharp_prefer_simple_default_expression = true
+csharp_style_deconstructed_variable_declaration = true
+csharp_style_implicit_object_creation_when_type_is_apparent = true
+csharp_style_inlined_variable_declaration = true
+csharp_style_prefer_index_operator = true
+csharp_style_prefer_local_over_anonymous_function = true
+csharp_style_prefer_null_check_over_type_check = true
+csharp_style_prefer_range_operator = true
+csharp_style_prefer_tuple_swap = true
+csharp_style_prefer_utf8_string_literals = true
+csharp_style_throw_expression = true
+csharp_style_unused_value_assignment_preference = discard_variable
+csharp_style_unused_value_expression_statement_preference = discard_variable
 
 # "using" 指令首选项
 csharp_using_directive_placement = outside_namespace:silent
+
+# 新行首选项
+csharp_style_allow_blank_line_after_colon_in_constructor_initializer_experimental = true
+csharp_style_allow_blank_lines_between_consecutive_braces_experimental = true
+csharp_style_allow_embedded_statements_on_same_line_experimental = true
 
 #### C# 格式规则 ####
 
@@ -167,98 +197,118 @@ csharp_preserve_single_line_statements = true
 
 # 命名规则
 
-dotnet_naming_rule.常量字段_should_be_帕斯卡拼写法.severity = suggestion
-dotnet_naming_rule.常量字段_should_be_帕斯卡拼写法.symbols = 常量字段
-dotnet_naming_rule.常量字段_should_be_帕斯卡拼写法.style = 帕斯卡拼写法
+dotnet_naming_rule.接口_should_be_以i开头.severity = warning
+dotnet_naming_rule.接口_should_be_以i开头.symbols = 接口
+dotnet_naming_rule.接口_should_be_以i开头.style = 以i开头
 
-dotnet_naming_rule.接口_should_be_以_i_开始.severity = error
-dotnet_naming_rule.接口_should_be_以_i_开始.symbols = 接口
-dotnet_naming_rule.接口_should_be_以_i_开始.style = 以_i_开始
+dotnet_naming_rule.类型_接口_类_枚举_结构体__should_be_pascal_case.severity = warning
+dotnet_naming_rule.类型_接口_类_枚举_结构体__should_be_pascal_case.symbols = 类型_接口_类_枚举_结构体_
+dotnet_naming_rule.类型_接口_类_枚举_结构体__should_be_pascal_case.style = pascal_case
 
-dotnet_naming_rule.类型_should_be_帕斯卡拼写法.severity = error
-dotnet_naming_rule.类型_should_be_帕斯卡拼写法.symbols = 类型
-dotnet_naming_rule.类型_should_be_帕斯卡拼写法.style = 帕斯卡拼写法
+dotnet_naming_rule.非字段成员_should_be_pascal_case.severity = warning
+dotnet_naming_rule.非字段成员_should_be_pascal_case.symbols = 非字段成员
+dotnet_naming_rule.非字段成员_should_be_pascal_case.style = pascal_case
 
-dotnet_naming_rule.非字段成员_should_be_帕斯卡拼写法.severity = suggestion
-dotnet_naming_rule.非字段成员_should_be_帕斯卡拼写法.symbols = 非字段成员
-dotnet_naming_rule.非字段成员_should_be_帕斯卡拼写法.style = 帕斯卡拼写法
+dotnet_naming_rule.私有静态只读字段_should_be_以s_为前缀.severity = warning
+dotnet_naming_rule.私有静态只读字段_should_be_以s_为前缀.symbols = 私有静态只读字段
+dotnet_naming_rule.私有静态只读字段_should_be_以s_为前缀.style = 以s_为前缀
 
-dotnet_naming_rule.私有或内部静态字段_should_be_s_起始标记.severity = suggestion
-dotnet_naming_rule.私有或内部静态字段_should_be_s_起始标记.symbols = 私有或内部静态字段
-dotnet_naming_rule.私有或内部静态字段_should_be_s_起始标记.style = s_起始标记
+dotnet_naming_rule.公有静态只读字段_should_be_pascal_case.severity = warning
+dotnet_naming_rule.公有静态只读字段_should_be_pascal_case.symbols = 公有静态只读字段
+dotnet_naming_rule.公有静态只读字段_should_be_pascal_case.style = pascal_case
 
-dotnet_naming_rule.私有或内部字段_should_be__起始标记.severity = warning
-dotnet_naming_rule.私有或内部字段_should_be__起始标记.symbols = 私有或内部字段
-dotnet_naming_rule.私有或内部字段_should_be__起始标记.style = _起始标记
+dotnet_naming_rule.常量_should_be_pascal_case.severity = warning
+dotnet_naming_rule.常量_should_be_pascal_case.symbols = 常量
+dotnet_naming_rule.常量_should_be_pascal_case.style = pascal_case
 
-dotnet_naming_rule.静态只读字段_should_be_帕斯卡拼写法.severity = suggestion
-dotnet_naming_rule.静态只读字段_should_be_帕斯卡拼写法.symbols = 静态只读字段
-dotnet_naming_rule.静态只读字段_should_be_帕斯卡拼写法.style = 帕斯卡拼写法
+dotnet_naming_rule.静态字段_should_be_以s_为前缀.severity = warning
+dotnet_naming_rule.静态字段_should_be_以s_为前缀.symbols = 静态字段
+dotnet_naming_rule.静态字段_should_be_以s_为前缀.style = 以s_为前缀
 
-dotnet_naming_rule.属性_should_be_帕斯卡拼写法.severity = error
-dotnet_naming_rule.属性_should_be_帕斯卡拼写法.symbols = 属性
-dotnet_naming_rule.属性_should_be_帕斯卡拼写法.style = 帕斯卡拼写法
+dotnet_naming_rule.私有或内部字段_should_be_以_为前缀.severity = warning
+dotnet_naming_rule.私有或内部字段_should_be_以_为前缀.symbols = 私有或内部字段
+dotnet_naming_rule.私有或内部字段_should_be_以_为前缀.style = 以_为前缀
 
-dotnet_naming_rule.事件_should_be_帕斯卡拼写法.severity = error
-dotnet_naming_rule.事件_should_be_帕斯卡拼写法.symbols = 事件
-dotnet_naming_rule.事件_should_be_帕斯卡拼写法.style = 帕斯卡拼写法
+dotnet_naming_rule.属性_should_be_pascal_case.severity = warning
+dotnet_naming_rule.属性_should_be_pascal_case.symbols = 属性
+dotnet_naming_rule.属性_should_be_pascal_case.style = pascal_case
+
+dotnet_naming_rule.方法_should_be_pascal_case.severity = warning
+dotnet_naming_rule.方法_should_be_pascal_case.symbols = 方法
+dotnet_naming_rule.方法_should_be_pascal_case.style = pascal_case
 
 # 符号规范
 
 dotnet_naming_symbols.接口.applicable_kinds = interface
-dotnet_naming_symbols.接口.applicable_accessibilities = public, internal, private, protected, protected_internal
-dotnet_naming_symbols.接口.required_modifiers = 
+dotnet_naming_symbols.接口.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.接口.required_modifiers =
 
-dotnet_naming_symbols.事件.applicable_kinds = event
-dotnet_naming_symbols.事件.applicable_accessibilities = public, internal, private, protected, protected_internal
-dotnet_naming_symbols.事件.required_modifiers = 
+dotnet_naming_symbols.方法.applicable_kinds = method
+dotnet_naming_symbols.方法.applicable_accessibilities = *
+dotnet_naming_symbols.方法.required_modifiers =
 
 dotnet_naming_symbols.属性.applicable_kinds = property
-dotnet_naming_symbols.属性.applicable_accessibilities = public, internal, private, protected, protected_internal
-dotnet_naming_symbols.属性.required_modifiers = 
+dotnet_naming_symbols.属性.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.属性.required_modifiers =
+
+dotnet_naming_symbols.静态字段.applicable_kinds = field
+dotnet_naming_symbols.静态字段.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.静态字段.required_modifiers = static
 
 dotnet_naming_symbols.私有或内部字段.applicable_kinds = field
-dotnet_naming_symbols.私有或内部字段.applicable_accessibilities = internal, private
-dotnet_naming_symbols.私有或内部字段.required_modifiers = 
+dotnet_naming_symbols.私有或内部字段.applicable_accessibilities = internal, private, private_protected
+dotnet_naming_symbols.私有或内部字段.required_modifiers =
 
-dotnet_naming_symbols.私有或内部静态字段.applicable_kinds = field
-dotnet_naming_symbols.私有或内部静态字段.applicable_accessibilities = internal, private
-dotnet_naming_symbols.私有或内部静态字段.required_modifiers = static
-
-dotnet_naming_symbols.类型.applicable_kinds = class, struct, interface, enum
-dotnet_naming_symbols.类型.applicable_accessibilities = public, internal, private, protected, protected_internal
-dotnet_naming_symbols.类型.required_modifiers = 
+dotnet_naming_symbols.类型_接口_类_枚举_结构体_.applicable_kinds = class, struct, interface, enum
+dotnet_naming_symbols.类型_接口_类_枚举_结构体_.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.类型_接口_类_枚举_结构体_.required_modifiers =
 
 dotnet_naming_symbols.非字段成员.applicable_kinds = property, event, method
-dotnet_naming_symbols.非字段成员.applicable_accessibilities = public, internal, private, protected, protected_internal
-dotnet_naming_symbols.非字段成员.required_modifiers = 
+dotnet_naming_symbols.非字段成员.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.非字段成员.required_modifiers =
 
-dotnet_naming_symbols.常量字段.applicable_kinds = field
-dotnet_naming_symbols.常量字段.applicable_accessibilities = *
-dotnet_naming_symbols.常量字段.required_modifiers = const
+dotnet_naming_symbols.常量.applicable_kinds = field
+dotnet_naming_symbols.常量.applicable_accessibilities = public, internal, private, protected, protected_internal, private_protected
+dotnet_naming_symbols.常量.required_modifiers = const
 
-dotnet_naming_symbols.静态只读字段.applicable_kinds = field
-dotnet_naming_symbols.静态只读字段.applicable_accessibilities = *
-dotnet_naming_symbols.静态只读字段.required_modifiers = readonly, static
+dotnet_naming_symbols.私有静态只读字段.applicable_kinds = field
+dotnet_naming_symbols.私有静态只读字段.applicable_accessibilities = private, protected, protected_internal, private_protected
+dotnet_naming_symbols.私有静态只读字段.required_modifiers = readonly, static
+
+dotnet_naming_symbols.公有静态只读字段.applicable_kinds = field
+dotnet_naming_symbols.公有静态只读字段.applicable_accessibilities = public, internal
+dotnet_naming_symbols.公有静态只读字段.required_modifiers = readonly, static
 
 # 命名样式
 
-dotnet_naming_style.帕斯卡拼写法.required_prefix = 
-dotnet_naming_style.帕斯卡拼写法.required_suffix = 
-dotnet_naming_style.帕斯卡拼写法.word_separator = 
-dotnet_naming_style.帕斯卡拼写法.capitalization = pascal_case
+dotnet_naming_style.pascal_case.required_prefix =
+dotnet_naming_style.pascal_case.required_suffix =
+dotnet_naming_style.pascal_case.word_separator =
+dotnet_naming_style.pascal_case.capitalization = pascal_case
 
-dotnet_naming_style.以_i_开始.required_prefix = I
-dotnet_naming_style.以_i_开始.required_suffix = 
-dotnet_naming_style.以_i_开始.word_separator = 
-dotnet_naming_style.以_i_开始.capitalization = pascal_case
+dotnet_naming_style.以i开头.required_prefix = I
+dotnet_naming_style.以i开头.required_suffix =
+dotnet_naming_style.以i开头.word_separator =
+dotnet_naming_style.以i开头.capitalization = pascal_case
 
-dotnet_naming_style._起始标记.required_prefix = _
-dotnet_naming_style._起始标记.required_suffix = 
-dotnet_naming_style._起始标记.word_separator = 
-dotnet_naming_style._起始标记.capitalization = camel_case
+dotnet_naming_style.以s_为前缀.required_prefix = s_
+dotnet_naming_style.以s_为前缀.required_suffix =
+dotnet_naming_style.以s_为前缀.word_separator =
+dotnet_naming_style.以s_为前缀.capitalization = camel_case
 
-dotnet_naming_style.s_起始标记.required_prefix = s_
-dotnet_naming_style.s_起始标记.required_suffix = 
-dotnet_naming_style.s_起始标记.word_separator = 
-dotnet_naming_style.s_起始标记.capitalization = camel_case
+dotnet_naming_style.以_为前缀.required_prefix = _
+dotnet_naming_style.以_为前缀.required_suffix =
+dotnet_naming_style.以_为前缀.word_separator =
+dotnet_naming_style.以_为前缀.capitalization = camel_case
+
+[*.csproj]
+indent_size = 2
+tab_width = 2
+
+[*.props]
+indent_size = 2
+tab_width = 2
+
+[*.json]
+indent_size = 2
+tab_width = 2

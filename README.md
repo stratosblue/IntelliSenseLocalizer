@@ -1,4 +1,4 @@
-# IntelliSenseLocalizer [中文文档](./README.zh-cn.md)
+﻿# IntelliSenseLocalizer [中文文档](./README.zh-cn.md)
 a tool for generate and install Localized IntelliSense files. 用于生成和安装本地化IntelliSense文件的工具。
 
 ## intro

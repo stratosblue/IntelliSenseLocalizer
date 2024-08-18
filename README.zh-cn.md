@@ -1,4 +1,4 @@
-# IntelliSenseLocalizer
+﻿# IntelliSenseLocalizer
 用于生成和安装本地化IntelliSense文件的工具。
 
 ## 简介

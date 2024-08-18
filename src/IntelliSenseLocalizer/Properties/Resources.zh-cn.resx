@@ -235,4 +235,25 @@ islocalizer cache -h
 
 更多信息请访问：https://github.com/stratosblue/IntelliSenseLocalizer</value>
   </data>
+  <data name="StringCMDTranslateOptionFileDescription" xml:space="preserve">
+    <value>目标xml文件。</value>
+  </data>
+  <data name="StringCMDTranslateOptionServerDescription" xml:space="preserve">
+    <value>翻译服务端点地址。</value>
+  </data>
+  <data name="StringCMDTranslateOptionLocalesDescription" xml:space="preserve">
+    <value>翻译的目标区域列表。（多个值之间使用 ;）</value>
+  </data>
+  <data name="StringCMDTranslateOptionOutputDescription" xml:space="preserve">
+    <value>输出根目录，每个目标区域将在这里建立单独的子目录。</value>
+  </data>
+  <data name="StringCMDTranslateOptionPatchDescription" xml:space="preserve">
+    <value>设置当前是否为补丁模式。</value>
+  </data>
+  <data name="StringCMDTranslateDescription" xml:space="preserve">
+    <value>翻译目标xml文件到目标区域。</value>
+  </data>
+  <data name="StringCMDTranslateOptionFromLocaleDescription" xml:space="preserve">
+    <value>指定原始xml的区域信息。</value>
+  </data>
 </root>

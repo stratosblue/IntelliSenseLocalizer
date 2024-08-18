@@ -235,4 +235,25 @@ if that doesn't work. try use command 'dotnet tool update -g islocalizer' to upd
 
 More info at: https://github.com/stratosblue/IntelliSenseLocalizer</value>
   </data>
+  <data name="StringCMDTranslateOptionFileDescription" xml:space="preserve">
+    <value>the target xml file.</value>
+  </data>
+  <data name="StringCMDTranslateOptionServerDescription" xml:space="preserve">
+    <value>the translate server endpoint address.</value>
+  </data>
+  <data name="StringCMDTranslateOptionLocalesDescription" xml:space="preserve">
+    <value>the trasnlate traget locales. (use ; between multiple values)</value>
+  </data>
+  <data name="StringCMDTranslateOptionOutputDescription" xml:space="preserve">
+    <value>the output root directory. the target locales will has a subdirectory at there.</value>
+  </data>
+  <data name="StringCMDTranslateOptionPatchDescription" xml:space="preserve">
+    <value>set whether the current mode is patch mode.</value>
+  </data>
+  <data name="StringCMDTranslateDescription" xml:space="preserve">
+    <value>translate the target xml file to target locales.</value>
+  </data>
+  <data name="StringCMDTranslateOptionFromLocaleDescription" xml:space="preserve">
+    <value>specify the source xml locale.</value>
+  </data>
 </root>

@@ -23,6 +23,10 @@
     "IntelliSenseLocalizer - clean": {
       "commandName": "Project",
       "commandLineArgs": "[debug] clean"
+    },
+    "IntelliSenseLocalizer - translate": {
+      "commandName": "Project",
+      "commandLineArgs": "[debug] translate -f \"{xml_file_path}\" -s http://127.0.0.1:16432 -p false"
     }
   }
 }

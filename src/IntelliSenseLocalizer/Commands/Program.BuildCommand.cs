@@ -89,7 +89,7 @@ internal partial class Program
     {
         locale = string.IsNullOrWhiteSpace(locale) ? LocalizerEnvironment.CurrentLocale : locale;
 
-        if (string.IsNullOrWhiteSpace("locale"))
+        if (string.IsNullOrWhiteSpace(locale))
         {
             s_logger.LogCritical("\"locale\" must be specified.");
             Environment.Exit(1);

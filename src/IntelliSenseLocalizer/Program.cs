@@ -51,6 +51,7 @@ internal partial class Program
             BuildBuildCommand(),
             BuildClearCommand(),
             BuildCleanCommand(),
+            BuildTranslateCommand(),
         };
 
         var customOption = new Option<string?>("--custom", "Custom addon options.");
