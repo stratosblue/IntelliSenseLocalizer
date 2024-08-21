@@ -139,7 +139,7 @@
     <value>select application pack. eg: "Microsoft.AspNetCore.App". process all pack default..</value>
   </data>
   <data name="StringCMDBuildOptionParallelCountDescription" xml:space="preserve">
-    <value>set the parallel process count. large value wiil let MS block your ip fast.</value>
+    <value>set the parallel process count. large value will let MS block your ip fast.</value>
   </data>
   <data name="StringCMDBuildOptionSeparateLineDescription" xml:space="preserve">
     <value>the separate line between origin and locale content. (effective only use bilingual comparison)</value>
@@ -154,7 +154,7 @@
     <value>try install the localized IntelliSense archive from nuget.org.</value>
   </data>
   <data name="StringCMDInstallAutoOptionMonikerDescription" xml:space="preserve">
-    <value>select .net moniker. eg: "net6.0". default is the installed latest version.</value>
+    <value>select .net moniker. eg: "net6.0". default is the installed latest version.(use ; between multiple values)</value>
   </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>install the localized intellisense file. (from local or online.)</value>

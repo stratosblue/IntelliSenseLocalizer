@@ -154,7 +154,7 @@
     <value>尝试从nuget.org安装本地化的intellisense文件包。</value>
   </data>
   <data name="StringCMDInstallAutoOptionMonikerDescription" xml:space="preserve">
-    <value>指定.net名称。如 "net6.0"。默认为已安装最高版本的.net。</value>
+    <value>指定.net名称。如 "net6.0"。默认为已安装最高版本的.net。（多个值之间使用 ;）</value>
   </data>
   <data name="StringCMDInstallDescription" xml:space="preserve">
     <value>安装本地化的智能感知文件。（从本地安装或在线安装。）</value>

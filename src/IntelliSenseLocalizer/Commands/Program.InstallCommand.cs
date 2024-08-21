@@ -13,12 +13,14 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    #region Private 方法
+
     private static Command BuildInstallCommand()
     {
         var installCommand = new Command("install", Resources.StringCMDInstallDescription);
         var sourceOption = new Argument<string>("source", Resources.StringCMDInstallOptionSourceDescription);
-        var targetOption = new Option<string>(new[] { "-t", "--target" }, () => LocalizerEnvironment.DefaultSdkRoot, Resources.StringCMDInstallOptionTargetDescription);
-        var copyToNugetGlobalCacheOption = new Option<bool>(new[] { "-ctn", "--copy-to-nuget-global-cache" }, () => false, Resources.StringCMDInstallOptionCopyToNugetGlobalCacheDescription);
+        var targetOption = new Option<string>(["-t", "--target"], () => LocalizerEnvironment.DefaultSdkRoot, Resources.StringCMDInstallOptionTargetDescription);
+        var copyToNugetGlobalCacheOption = new Option<bool>(["-ctn", "--copy-to-nuget-global-cache"], () => false, Resources.StringCMDInstallOptionCopyToNugetGlobalCacheDescription);
 
         installCommand.AddArgument(sourceOption);
         installCommand.AddOption(targetOption);
@@ -37,18 +39,18 @@ internal partial class Program
         }, sourceOption, targetOption, copyToNugetGlobalCacheOption);
 
         {
-            var monikerOption = new Option<string>(new[] { "-m", "--moniker" }, Resources.StringCMDInstallAutoOptionMonikerDescription);
-            var localeOption = new Option<string>(new[] { "-l", "--locale" }, () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDInstallOptionLocaleDescription);
-            var contentCompareTypeOption = new Option<ContentCompareType>(new[] { "-cc", "--content-compare" }, () => ContentCompareType.None, Resources.StringCMDBuildOptionContentCompareDescription);
+            var monikersOption = new Option<string>(["-m", "--moniker"], Resources.StringCMDInstallAutoOptionMonikerDescription);
+            var localeOption = new Option<string>(["-l", "--locale"], () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDInstallOptionLocaleDescription);
+            var contentCompareTypeOption = new Option<ContentCompareType>(["-cc", "--content-compare"], () => ContentCompareType.None, Resources.StringCMDBuildOptionContentCompareDescription);
 
             var autoInstallCommand = new Command("auto", Resources.StringCMDInstallAutoInstallDescription);
             autoInstallCommand.AddOption(targetOption);
-            autoInstallCommand.AddOption(monikerOption);
+            autoInstallCommand.AddOption(monikersOption);
             autoInstallCommand.AddOption(localeOption);
             autoInstallCommand.AddOption(contentCompareTypeOption);
             autoInstallCommand.AddOption(copyToNugetGlobalCacheOption);
 
-            autoInstallCommand.SetHandler<string, string, string, ContentCompareType, bool>((string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache) =>
+            autoInstallCommand.SetHandler<string, string, string, ContentCompareType, bool>((string target, string monikers, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache) =>
             {
                 try
                 {
@@ -65,13 +67,13 @@ internal partial class Program
                         return;
                     }
 
-                    if (string.IsNullOrWhiteSpace(moniker))
+                    if (string.IsNullOrWhiteSpace(monikers))
                     {
                         var maxVersion = applicationPacks.Max(m => m.Versions.Max(m => m.Version))!;
-                        moniker = applicationPacks.SelectMany(m => m.Versions).Where(m => m.Version == maxVersion).First().Monikers.FirstOrDefault()?.Moniker ?? string.Empty;
+                        monikers = applicationPacks.SelectMany(m => m.Versions).Where(m => m.Version == maxVersion).First().Monikers.FirstOrDefault()?.Moniker ?? string.Empty;
                     }
 
-                    if (string.IsNullOrWhiteSpace(moniker))
+                    if (string.IsNullOrWhiteSpace(monikers))
                     {
                         WriteMessageAndExit("can not select moniker automatic. please specify moniker.");
                         return;
@@ -87,7 +89,10 @@ internal partial class Program
                         throw;
                     }
 
-                    InstallFromNugetAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
+                    foreach (var moniker in monikers.Split(';', StringSplitOptions.RemoveEmptyEntries))
+                    {
+                        InstallFromNugetAsync(target, monikers, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
+                    }
                 }
                 catch (Exception ex)
                 {
@@ -95,13 +100,15 @@ internal partial class Program
                     Console.WriteLine("press any key to continue");
                     Console.ReadKey();
                 }
-            }, targetOption, monikerOption, localeOption, contentCompareTypeOption, copyToNugetGlobalCacheOption);
+            }, targetOption, monikersOption, localeOption, contentCompareTypeOption, copyToNugetGlobalCacheOption);
 
             installCommand.Add(autoInstallCommand);
         }
 
         return installCommand;
     }
+
+    #endregion Private 方法
 
     #region nuget.org
 
@@ -222,32 +229,6 @@ internal partial class Program
 
     #endregion nuget.org
 
-    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, int retryCount = 3)
-    {
-        do
-        {
-            retryCount--;
-            try
-            {
-                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
-            }
-            catch (Exception ex)
-            {
-                if (retryCount > 0)
-                {
-                    Console.WriteLine($"Download fail {ex}");
-                    Console.WriteLine("Retry download");
-                }
-                else
-                {
-                    throw;
-                }
-            }
-        } while (retryCount > 0);
-
-        throw new InvalidOperationException("Download error");
-    }
-
     private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null)
     {
         Console.WriteLine($"Start download {downloadUrl}");
@@ -310,6 +291,32 @@ internal partial class Program
         InstallFromZipArchive(target, zipArchive, copyToNugetGlobalCache);
 
         return data;
+    }
+
+    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, int retryCount = 3)
+    {
+        do
+        {
+            retryCount--;
+            try
+            {
+                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
+            }
+            catch (Exception ex)
+            {
+                if (retryCount > 0)
+                {
+                    Console.WriteLine($"Download fail {ex}");
+                    Console.WriteLine("Retry download");
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        } while (retryCount > 0);
+
+        throw new InvalidOperationException("Download error");
     }
 
     private static void InstallFromZipArchive(string target, ZipArchive zipArchive, bool copyToNugetGlobalCache)
