@@ -39,8 +39,8 @@ public class AlibabaCloudTranslator : ITranslator
 
         var request = new TranslateGeneralRequest
         {
-            SourceLanguage = from.Split('-').First().ToLowerInvariant(),
-            TargetLanguage = to.Split('-').First().ToLowerInvariant(),
+            SourceLanguage = GetLanguage(from),
+            TargetLanguage = GetLanguage(to),
             SourceText = content,
             //FormatType = "text",
             FormatType = "html",
@@ -62,4 +62,18 @@ public class AlibabaCloudTranslator : ITranslator
     }
 
     #endregion Public 方法
+
+    #region Private 方法
+
+    private string GetLanguage(string locale)
+    {
+        locale = locale.ToLowerInvariant();
+        if (string.Equals("zh-tw", locale))
+        {
+            return locale;
+        }
+        return locale.Split('-').First();
+    }
+
+    #endregion Private 方法
 }
