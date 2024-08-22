@@ -91,7 +91,7 @@ internal partial class Program
 
                     foreach (var moniker in monikers.Split(';', StringSplitOptions.RemoveEmptyEntries))
                     {
-                        InstallFromNugetAsync(target, monikers, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
+                        InstallFromNugetAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
                     }
                 }
                 catch (Exception ex)
@@ -367,9 +367,13 @@ internal partial class Program
         var count = 0;
         var nugetCount = 0;
 
+        var nugetGlobalPackages = GlobalPackagesFinder.EnumeratePackages().ToList();
+
         foreach (var applicationPackRef in applicationPackRefs)
         {
-            var packName = applicationPackRef.OwnerMoniker.OwnerVersion.OwnerPack.Name;
+            var versionDescriptor = applicationPackRef.OwnerMoniker.OwnerVersion;
+            var version = versionDescriptor.Version;
+            var packName = versionDescriptor.OwnerPack.Name;
             if (!packEntryGroups.TryGetValue(packName, out var entries)
                 || entries.Length == 0)
             {
@@ -393,18 +397,38 @@ internal partial class Program
 
                 count++;
             }
+
+            var nugetRefCaches = nugetGlobalPackages.Where(m => string.Equals(packName, m.NormalizedName, StringComparison.OrdinalIgnoreCase))
+                                                    .SelectMany(m => m.Versions)
+                                                    .Where(m => m.Version.Major == version.Major && m.Version.Minor == version.Minor)
+                                                    .ToList();
+
+            foreach (var nugetRefCache in nugetRefCaches)
+            {
+                rootPath = Path.Combine(nugetRefCache.RootPath, "ref", moniker, locale);
+
+                DirectoryUtil.CheckDirectory(rootPath);
+
+                foreach (var entry in entries)
+                {
+                    var targetFile = Path.Combine(rootPath, entry.Name);
+                    entry.ExtractToFile(targetFile, true);
+                    Console.WriteLine($"Created File: {targetFile}");
+
+                    nugetCount++;
+                }
+            }
         }
 
         if (copyToNugetGlobalCache)
         {
-            var foundNugetPackageIntelliSenseFiles = GlobalPackagesFinder.EnumeratePackages()
-                                                                         .Where(m => filesDictionary.ContainsKey(m.NormalizedName))
-                                                                         .SelectMany(m => m.Versions)
-                                                                         .SelectMany(m => m.Monikers)
-                                                                         .Where(m => m.Moniker.EqualsOrdinalIgnoreCase(moniker))
-                                                                         .SelectMany(m => m.IntelliSenseFiles)
-                                                                         .Where(m => filesDictionary.ContainsKey(m.PackName))
-                                                                         .ToArray();
+            var foundNugetPackageIntelliSenseFiles = nugetGlobalPackages.Where(m => filesDictionary.ContainsKey(m.NormalizedName))
+                                                                        .SelectMany(m => m.Versions)
+                                                                        .SelectMany(m => m.Monikers)
+                                                                        .Where(m => m.Moniker.EqualsOrdinalIgnoreCase(moniker))
+                                                                        .SelectMany(m => m.IntelliSenseFiles)
+                                                                        .Where(m => filesDictionary.ContainsKey(m.PackName))
+                                                                        .ToArray();
 
             foreach (var nugetPackageIntelliSenseFile in foundNugetPackageIntelliSenseFiles)
             {
