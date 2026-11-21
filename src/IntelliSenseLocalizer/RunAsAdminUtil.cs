@@ -13,7 +13,7 @@ internal static class RunAsAdminUtil
             //try run as administrator
             try
             {
-                var processStartInfo = new ProcessStartInfo(processPath, $"{Environment.CommandLine} --custom delay-exit-20s")
+                var processStartInfo = new ProcessStartInfo(processPath, $"{string.Join(' ', Environment.GetCommandLineArgs().Skip(1))} --custom delay-exit-20s")
                 {
                     Verb = "runas",
                     UseShellExecute = true,
