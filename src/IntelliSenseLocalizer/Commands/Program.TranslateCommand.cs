@@ -13,15 +13,48 @@ internal partial class Program
 
     private static Command BuildTranslateCommand()
     {
-        var fileOption = new Option<string>(["-f", "--file"], Resources.StringCMDTranslateOptionFileDescription);
-        var serverOption = new Option<string>(["-s", "--server"], Resources.StringCMDTranslateOptionServerDescription);
-        var fromLocaleOption = new Option<string>(["-fl", "--from-locale"], () => "en-us", Resources.StringCMDTranslateOptionFromLocaleDescription);
-        var targetLocalesOption = new Option<string>(["-tl", "--target-locales"], () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDTranslateOptionLocalesDescription);
-        var contentCompareTypeOption = new Option<ContentCompareType>(["-cc", "--content-compare"], () => ContentCompareType.OriginFirst, Resources.StringCMDBuildOptionContentCompareDescription);
-        var separateLineOption = new Option<string?>(["-sl", "--separate-line"], Resources.StringCMDBuildOptionSeparateLineDescription);
-        var outputOption = new Option<string?>(["-o", "--output"], () => null, Resources.StringCMDTranslateOptionOutputDescription);
-        var parallelCountOption = new Option<int>(["-pc", "--parallel-count"], () => 2, Resources.StringCMDBuildOptionParallelCountDescription);
-        var patchOption = new Option<bool>(["-p", "--patch"], () => false, Resources.StringCMDTranslateOptionPatchDescription);
+        var fileOption = new Option<string>("--file", "-f")
+        {
+            Description = Resources.StringCMDTranslateOptionFileDescription,
+        };
+        var serverOption = new Option<string>("--server", "-s")
+        {
+            Description = Resources.StringCMDTranslateOptionServerDescription,
+        };
+        var fromLocaleOption = new Option<string>("--from-locale", "-fl")
+        {
+            Description = Resources.StringCMDTranslateOptionFromLocaleDescription,
+            DefaultValueFactory = _ => "en-us",
+        };
+        var targetLocalesOption = new Option<string>("--target-locales", "-tl")
+        {
+            Description = Resources.StringCMDTranslateOptionLocalesDescription,
+            DefaultValueFactory = _ => LocalizerEnvironment.CurrentLocale,
+        };
+        var contentCompareTypeOption = new Option<ContentCompareType>("--content-compare", "-cc")
+        {
+            Description = Resources.StringCMDBuildOptionContentCompareDescription,
+            DefaultValueFactory = _ => ContentCompareType.OriginFirst,
+        };
+        var separateLineOption = new Option<string?>("--separate-line", "-sl")
+        {
+            Description = Resources.StringCMDBuildOptionSeparateLineDescription,
+        };
+        var outputOption = new Option<string?>("--output", "-o")
+        {
+            Description = Resources.StringCMDTranslateOptionOutputDescription,
+            DefaultValueFactory = _ => null,
+        };
+        var parallelCountOption = new Option<int>("--parallel-count", "-pc")
+        {
+            Description = Resources.StringCMDBuildOptionParallelCountDescription,
+            DefaultValueFactory = _ => 1,
+        };
+        var patchOption = new Option<bool>("--patch", "-p")
+        {
+            Description = Resources.StringCMDTranslateOptionPatchDescription,
+            DefaultValueFactory = _ => false,
+        };
 
         var translateCommand = new Command("translate", Resources.StringCMDTranslateDescription)
         {
@@ -36,17 +69,20 @@ internal partial class Program
             patchOption,
         };
 
-        translateCommand.SetHandler<string, string, string, string, ContentCompareType, string?, string?, int, bool, int?>(TranslateLocalizedIntelliSenseFile,
-                                                                                                                           fileOption,
-                                                                                                                           serverOption,
-                                                                                                                           fromLocaleOption,
-                                                                                                                           targetLocalesOption,
-                                                                                                                           contentCompareTypeOption,
-                                                                                                                           separateLineOption,
-                                                                                                                           outputOption,
-                                                                                                                           parallelCountOption,
-                                                                                                                           patchOption,
-                                                                                                                           s_logLevelOption);
+        translateCommand.SetAction(async (parseResult, cancellationToken) =>
+        {
+            await TranslateLocalizedIntelliSenseFile(file: parseResult.GetRequiredValue(fileOption),
+                                                     server: parseResult.GetRequiredValue(serverOption),
+                                                     fromLocale: parseResult.GetRequiredValue(fromLocaleOption),
+                                                     targetLocalesString: parseResult.GetRequiredValue(targetLocalesOption),
+                                                     contentCompareType: parseResult.GetRequiredValue(contentCompareTypeOption),
+                                                     separateLine: parseResult.GetValue(separateLineOption),
+                                                     outputRoot: parseResult.GetValue(outputOption),
+                                                     parallelCount: parseResult.GetValue(parallelCountOption),
+                                                     isPatch: parseResult.GetValue(patchOption),
+                                                     logLevel: parseResult.GetValue(s_logLevelOption),
+                                                     cancellationToken: cancellationToken);
+        });
 
         return translateCommand;
     }
@@ -68,7 +104,7 @@ internal partial class Program
         return cultureInfo;
     }
 
-    private static void TranslateLocalizedIntelliSenseFile(string file,
+    private static async Task TranslateLocalizedIntelliSenseFile(string file,
                                                            string server,
                                                            string fromLocale,
                                                            string targetLocalesString,
@@ -77,7 +113,8 @@ internal partial class Program
                                                            string? outputRoot,
                                                            int parallelCount,
                                                            bool isPatch,
-                                                           int? logLevel)
+                                                           int? logLevel,
+                                                           CancellationToken cancellationToken)
     {
         if (contentCompareType == ContentCompareType.Default)
         {
@@ -136,9 +173,9 @@ internal partial class Program
 
         using var contentTranslator = new DefaultContentTranslator(server);
 
-        TranslateAsync().Wait();
+        await TranslateAsync(cancellationToken);
 
-        async Task TranslateAsync()
+        async Task TranslateAsync(CancellationToken cancellationToken)
         {
             var translator = s_serviceProvider.GetRequiredService<LocalizeIntelliSenseTranslator>();
 
@@ -151,7 +188,7 @@ internal partial class Program
 
                 var context = new TranslateContext(file, contentCompareType, separateLine, outputPath, sourceCultureInfo, targetCultureInfo, contentTranslator, isPatch);
 
-                await translator.TranslateAsync(context, default);
+                await translator.TranslateAsync(context, cancellationToken);
             }
         }
     }

@@ -9,18 +9,36 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    #region Private 方法
+
     private static Command BuildUnInstallCommand()
     {
         var uninstallCommand = new Command("uninstall", Resources.StringCMDUnInstallDescription);
-        Argument<string> monikerArgument = new("moniker", Resources.StringCMDUnInstallArgumentMonikerDescription);
-        Argument<string> localeArgument = new("locale", () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDUnInstallArgumentLocaleDescription);
-        Option<string> targetOption = new(["-t", "--target"], () => LocalizerEnvironment.DefaultSdkRoot, Resources.StringCMDUnInstallOptionTargetDescription);
+        Argument<string> monikerArgument = new("moniker")
+        {
+            Description = Resources.StringCMDUnInstallArgumentMonikerDescription,
+        };
+        Argument<string> localeArgument = new("locale")
+        {
+            Description = Resources.StringCMDUnInstallArgumentLocaleDescription,
+            DefaultValueFactory = _ => LocalizerEnvironment.CurrentLocale
+        };
+        Option<string> targetOption = new("--target", "-t")
+        {
+            Description = Resources.StringCMDUnInstallOptionTargetDescription,
+            DefaultValueFactory = _ => LocalizerEnvironment.DefaultSdkRoot
+        };
 
         uninstallCommand.Add(monikerArgument);
         uninstallCommand.Add(localeArgument);
         uninstallCommand.Add(targetOption);
 
-        uninstallCommand.SetHandler<string, string, string>(UnInstall, monikerArgument, localeArgument, targetOption);
+        uninstallCommand.SetAction(parseResult =>
+        {
+            UnInstall(moniker: parseResult.GetRequiredValue(monikerArgument),
+                      locale: parseResult.GetRequiredValue(localeArgument),
+                      target: parseResult.GetRequiredValue(targetOption));
+        });
 
         return uninstallCommand;
     }
@@ -95,4 +113,6 @@ internal partial class Program
             }
         }
     }
+
+    #endregion Private 方法
 }

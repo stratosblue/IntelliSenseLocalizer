@@ -10,20 +10,30 @@ jobs:
   publish-with-build:
 
     runs-on: windows-latest
-        
+
+    permissions:
+      id-token: write
+      
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v6.1.0
     - name: Add msbuild to PATH
-      uses: microsoft/setup-msbuild@v1
+      uses: microsoft/setup-msbuild@v3
     - name: Setup .NET Core SDK
-      uses: actions/setup-dotnet@v3
+      uses: actions/setup-dotnet@v6.1.0
       with:
-        dotnet-version: '8.0.x'
+        dotnet-version: '10.0.x'
     - name: build
       run: dotnet build -c Release
     - name: pack
       run: msbuild -t:pack -p:Configuration=Release -p:OutputPath=../../output
+
+    - name: NuGet login
+      uses: NuGet/login@v1
+      id: login
+      with:
+        user: ${{ secrets.NUGET_USER }}
+
     - name: push package
       shell: pwsh
       working-directory: ./output
-      run: Get-ChildItem -File -Filter '*.nupkg' | ForEach-Object { dotnet nuget push $_ -k ${{secrets.NUGET_KEY}} -s https://api.nuget.org/v3/index.json --no-service-endpoint --skip-duplicate; }
+      run: Get-ChildItem -File -Filter '*.nupkg' | ForEach-Object { dotnet nuget push $_ -k ${{steps.login.outputs.NUGET_API_KEY}} -s https://api.nuget.org/v3/index.json --no-service-endpoint --skip-duplicate; }

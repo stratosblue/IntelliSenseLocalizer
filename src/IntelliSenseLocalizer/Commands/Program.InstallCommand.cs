@@ -18,40 +18,71 @@ internal partial class Program
     private static Command BuildInstallCommand()
     {
         var installCommand = new Command("install", Resources.StringCMDInstallDescription);
-        var sourceOption = new Argument<string>("source", Resources.StringCMDInstallOptionSourceDescription);
-        var targetOption = new Option<string>(["-t", "--target"], () => LocalizerEnvironment.DefaultSdkRoot, Resources.StringCMDInstallOptionTargetDescription);
-        var copyToNugetGlobalCacheOption = new Option<bool>(["-ctn", "--copy-to-nuget-global-cache"], () => false, Resources.StringCMDInstallOptionCopyToNugetGlobalCacheDescription);
-
-        installCommand.AddArgument(sourceOption);
-        installCommand.AddOption(targetOption);
-        installCommand.AddOption(copyToNugetGlobalCacheOption);
-
-        installCommand.SetHandler((string source, string target, bool copyToNugetGlobalCache) =>
+        var sourceOption = new Argument<string>("source")
         {
+            Description = Resources.StringCMDInstallOptionSourceDescription,
+        };
+        var targetOption = new Option<string>("--target", "-t")
+        {
+            Description = Resources.StringCMDInstallOptionTargetDescription,
+            DefaultValueFactory = _ => LocalizerEnvironment.DefaultSdkRoot,
+        };
+        var copyToNugetGlobalCacheOption = new Option<bool>("--copy-to-nuget-global-cache", "-ctn")
+        {
+            Description = Resources.StringCMDInstallOptionCopyToNugetGlobalCacheDescription,
+            DefaultValueFactory = _ => false,
+        };
+
+        installCommand.Arguments.Add(sourceOption);
+        installCommand.Options.Add(targetOption);
+        installCommand.Options.Add(copyToNugetGlobalCacheOption);
+
+        installCommand.SetAction(async (parseResult, cancellationToken) =>
+        {
+            var source = parseResult.GetRequiredValue(sourceOption);
+            var target = parseResult.GetRequiredValue(targetOption);
+            var copyToNugetGlobalCache = parseResult.GetRequiredValue(copyToNugetGlobalCacheOption);
             if (source.StartsWith("http", StringComparison.OrdinalIgnoreCase))
             {
-                InstallFromUrlWithRetryAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache).Wait();
+                await InstallFromUrlWithRetryAsync(downloadUrl: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, cancellationToken: cancellationToken);
             }
             else
             {
                 InstallFromZipArchiveFile(sourceFile: source, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
             }
-        }, sourceOption, targetOption, copyToNugetGlobalCacheOption);
+        });
 
         {
-            var monikersOption = new Option<string>(["-m", "--moniker"], Resources.StringCMDInstallAutoOptionMonikerDescription);
-            var localeOption = new Option<string>(["-l", "--locale"], () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDInstallOptionLocaleDescription);
-            var contentCompareTypeOption = new Option<ContentCompareType>(["-cc", "--content-compare"], () => ContentCompareType.None, Resources.StringCMDBuildOptionContentCompareDescription);
+            var monikersOption = new Option<string>("--moniker", "-m")
+            {
+                Description = Resources.StringCMDInstallAutoOptionMonikerDescription,
+            };
+            var localeOption = new Option<string>("--locale", "-l")
+            {
+                Description = Resources.StringCMDInstallOptionLocaleDescription,
+                DefaultValueFactory = _ => LocalizerEnvironment.CurrentLocale,
+            };
+            var contentCompareTypeOption = new Option<ContentCompareType>("--content-compare", "-cc")
+            {
+                Description = Resources.StringCMDBuildOptionContentCompareDescription,
+                DefaultValueFactory = _ => ContentCompareType.None,
+            };
 
             var autoInstallCommand = new Command("auto", Resources.StringCMDInstallAutoInstallDescription);
-            autoInstallCommand.AddOption(targetOption);
-            autoInstallCommand.AddOption(monikersOption);
-            autoInstallCommand.AddOption(localeOption);
-            autoInstallCommand.AddOption(contentCompareTypeOption);
-            autoInstallCommand.AddOption(copyToNugetGlobalCacheOption);
+            autoInstallCommand.Options.Add(targetOption);
+            autoInstallCommand.Options.Add(monikersOption);
+            autoInstallCommand.Options.Add(localeOption);
+            autoInstallCommand.Options.Add(contentCompareTypeOption);
+            autoInstallCommand.Options.Add(copyToNugetGlobalCacheOption);
 
-            autoInstallCommand.SetHandler<string, string, string, ContentCompareType, bool>((string target, string monikers, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache) =>
+            autoInstallCommand.SetAction(async (parseResult, cancellationToken) =>
             {
+                var target = parseResult.GetValue(targetOption);
+                var monikers = parseResult.GetValue(monikersOption);
+                var locale = parseResult.GetRequiredValue(localeOption);
+                var contentCompareType = parseResult.GetRequiredValue(contentCompareTypeOption);
+                var copyToNugetGlobalCache = parseResult.GetRequiredValue(copyToNugetGlobalCacheOption);
+
                 if (contentCompareType == ContentCompareType.Default)
                 {
                     contentCompareType = ContentCompareType.OriginFirst;
@@ -96,7 +127,7 @@ internal partial class Program
 
                     foreach (var moniker in monikers.Split(';', StringSplitOptions.RemoveEmptyEntries))
                     {
-                        InstallFromNugetAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache).GetAwaiter().GetResult();
+                        await InstallFromNugetAsync(target, moniker, locale, contentCompareType, copyToNugetGlobalCache, cancellationToken);
                     }
                 }
                 catch (Exception ex)
@@ -105,7 +136,7 @@ internal partial class Program
                     Console.WriteLine("press any key to continue");
                     Console.ReadKey();
                 }
-            }, targetOption, monikersOption, localeOption, contentCompareTypeOption, copyToNugetGlobalCacheOption);
+            });
 
             installCommand.Add(autoInstallCommand);
         }
@@ -117,7 +148,7 @@ internal partial class Program
 
     #region nuget.org
 
-    private static async Task InstallFromNugetAsync(string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache)
+    private static async Task InstallFromNugetAsync(string target, string moniker, string locale, ContentCompareType contentCompareType, bool copyToNugetGlobalCache, CancellationToken cancellationToken)
     {
         try
         {
@@ -127,6 +158,7 @@ internal partial class Program
 
             var nugetIndex = await "https://api.nuget.org/v3/index.json".CreateHttpRequest()
                                                                         .AutoRedirection(true)
+                                                                        .WithCancellation(cancellationToken)
                                                                         .GetAsDynamicJsonAsync();
 
             IEnumerable<dynamic> resources = nugetIndex!.resources;
@@ -143,6 +175,7 @@ internal partial class Program
 
             var searchQueryResult = await searchQueryUrl.CreateHttpRequest()
                                                         .AutoRedirection(true)
+                                                        .WithCancellation(cancellationToken)
                                                         .GetAsDynamicJsonAsync();
 
             IEnumerable<dynamic> searchQueryResultItems = searchQueryResult!.data;
@@ -180,6 +213,7 @@ internal partial class Program
             var packgetDetailUrl = (string)targetVersionInfo["@id"];
             var packageDetailInfo = await packgetDetailUrl.CreateHttpRequest()
                                                           .AutoRedirection(true)
+                                                          .WithCancellation(cancellationToken)
                                                           .GetAsDynamicJsonAsync();
 
             var packageDownloadUrl = (string)packageDetailInfo!.packageContent;
@@ -196,7 +230,7 @@ internal partial class Program
                 return;
             }
 
-            var data = await InstallFromUrlWithRetryAsync(downloadUrl: packageDownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
+            var data = await InstallFromUrlWithRetryAsync(downloadUrl: packageDownloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, cancellationToken: cancellationToken);
 
             if (data is not null
                 && !File.Exists(cacheFile))
@@ -234,12 +268,16 @@ internal partial class Program
 
     #endregion nuget.org
 
-    private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null)
+    private static async Task<byte[]?> InstallFromUrlAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, string? fileName = null, CancellationToken cancellationToken = default)
     {
         Console.WriteLine($"Start download {downloadUrl}");
 
         //直接内存处理，不缓存了
-        using var httpRequestExecuteState = await downloadUrl.CreateHttpRequest().AutoRedirection().UseUserAgent(UserAgents.EdgeChromium).ExecuteAsync();
+        using var httpRequestExecuteState = await downloadUrl.CreateHttpRequest()
+                                                             .AutoRedirection()
+                                                             .WithCancellation(cancellationToken)
+                                                             .UseUserAgent(UserAgents.EdgeChromium)
+                                                             .ExecuteAsync();
 
         using var responseMessage = httpRequestExecuteState.HttpResponseMessage;
 
@@ -250,14 +288,14 @@ internal partial class Program
                       : null;
 
         var memeoryStream = new MemoryStream(length ?? 102400);
-        using var responseStream = await responseMessage.Content.ReadAsStreamAsync();
+        using var responseStream = await responseMessage.Content.ReadAsStreamAsync(cancellationToken);
 
         var buffer = new byte[102400];
         var lastDisplayTime = DateTime.UtcNow;
         var lastDisplayValue = 0.0;
         while (true)
         {
-            var readCount = await responseStream.ReadAsync(buffer, 0, buffer.Length);
+            var readCount = await responseStream.ReadAsync(buffer, 0, buffer.Length, cancellationToken);
             if (readCount == 0)
             {
                 break;
@@ -298,14 +336,14 @@ internal partial class Program
         return data;
     }
 
-    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, int retryCount = 3)
+    private static async Task<byte[]?> InstallFromUrlWithRetryAsync(string downloadUrl, string target, bool copyToNugetGlobalCache, int retryCount = 3, CancellationToken cancellationToken = default)
     {
         do
         {
             retryCount--;
             try
             {
-                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache);
+                return await InstallFromUrlAsync(downloadUrl: downloadUrl, target: target, copyToNugetGlobalCache: copyToNugetGlobalCache, cancellationToken: cancellationToken);
             }
             catch (Exception ex)
             {
@@ -479,6 +517,9 @@ internal partial class Program
 
     private static bool PathAuthorityCheck(string targetPath)
     {
+#if DEBUG
+        return false;
+#endif
         var writeTestPath = Path.Combine(targetPath, ".write_test");
         try
         {

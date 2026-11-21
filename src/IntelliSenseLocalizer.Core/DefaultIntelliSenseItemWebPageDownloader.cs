@@ -8,13 +8,23 @@ namespace IntelliSenseLocalizer;
 
 public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItemWebPageDownloader
 {
+    #region Public 字段
+
     public const string NotFoundPageContent = "404NotFound";
+
+    #endregion Public 字段
+
+    #region Private 字段
 
     private readonly string _cacheRoot;
 
     private readonly string _locale;
 
     private readonly SemaphoreSlim _parallelSemaphore;
+
+    #endregion Private 字段
+
+    #region Public 构造函数
 
     public DefaultIntelliSenseItemWebPageDownloader(CultureInfo cultureInfo, string cacheRoot, int parallelCount)
     {
@@ -25,6 +35,10 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
 
         DirectoryUtil.CheckDirectory(cacheRoot);
     }
+
+    #endregion Public 构造函数
+
+    #region Public 方法
 
     public void Dispose()
     {
@@ -41,7 +55,24 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
 
         DirectoryUtil.CheckDirectory(cacheDriectory);
 
-        var url = $"https://learn.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={frameworkMoniker}";
+        static string MonikerView(IntelliSenseItemDescriptor memberDescriptor, string frameworkMoniker)
+        {
+            var packName = memberDescriptor.IntelliSenseFileDescriptor.PackName;
+            if (packName.StartsWith("Microsoft.AspNetCore"))
+            {
+                return frameworkMoniker.Replace("net", "aspnetcore-");
+            }
+            else if (packName.StartsWith("Microsoft.WindowsDesktop"))
+            {
+                return frameworkMoniker.Replace("net", "windowsdesktop-");
+            }
+            else
+            {
+                return frameworkMoniker.Replace("net", "net-");
+            }
+        }
+
+        var url = $"https://learn.microsoft.com/{_locale}/dotnet/api/{queryKey}?view={MonikerView(memberDescriptor, frameworkMoniker)}";
 
         if (!ignoreCache
             && File.Exists(cacheFilePath))
@@ -56,11 +87,14 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
 
         HttpOperationResult<string> response;
 
+        using var localCTS = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
+        localCTS.CancelAfter(TimeSpan.FromSeconds(60));
+
         using var request = url.CreateHttpRequest(true)
-                               .UseUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/99.0.4844.74 Safari/537.36 Edg/99.0.1150.52")
+                               .UseUserAgent(UserAgents.Chrome)
                                .UseSystemProxy()
                                .AutoRedirection()
-                               .WithCancellation(cancellationToken);
+                               .WithCancellation(localCTS.Token);
 
         await _parallelSemaphore.WaitAsync(cancellationToken);
         try
@@ -103,4 +137,6 @@ public sealed class DefaultIntelliSenseItemWebPageDownloader : IIntelliSenseItem
             return new MSOnlineDocNotFoundException($"{url}");
         }
     }
+
+    #endregion Public 方法
 }

@@ -44,7 +44,7 @@ public class MSDocIntelliSenseItemUpdater : IIntelliSenseItemUpdater
 
         try
         {
-            var (html, url) = await _downloader.DownloadAsync(currentGroupItems.First(), false, default);
+            var (html, url) = await _downloader.DownloadAsync(currentGroupItems.First(), false, cancellationToken);
 
             var htmlDocument = new HtmlDocument();
             htmlDocument.LoadHtml(html);

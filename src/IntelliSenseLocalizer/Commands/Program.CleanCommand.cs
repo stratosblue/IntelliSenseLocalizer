@@ -14,7 +14,7 @@ internal partial class Program
     {
         var cleanCommand = new Command("clean", Resources.StringCMDCleanDescription);
 
-        cleanCommand.SetHandler(Clean);
+        cleanCommand.SetAction(_ => Clean());
 
         return cleanCommand;
     }

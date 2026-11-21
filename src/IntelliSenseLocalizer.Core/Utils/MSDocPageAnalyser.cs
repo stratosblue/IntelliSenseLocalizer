@@ -1,4 +1,5 @@
-﻿using System.Xml;
+﻿using System.Text.RegularExpressions;
+using System.Xml;
 
 using HtmlAgilityPack;
 
@@ -9,8 +10,10 @@ namespace IntelliSenseLocalizer;
 /// <summary>
 /// 微软文档页面分析器
 /// </summary>
-public static class MSDocPageAnalyser
+public static partial class MSDocPageAnalyser
 {
+    #region Public 方法
+
     /// <summary>
     /// 分析页面文档并提供分析结果
     /// </summary>
@@ -26,16 +29,17 @@ public static class MSDocPageAnalyser
             throw new Exception($"没有HTML节点");
         }
 
-        var memberNameHolderNodes = htmlRootNode.SelectNodes("//div[@class=\"memberNameHolder\"]");
+        var memberNameHolderNodes = htmlRootNode.SelectNodes("//div[@data-chunk-ids]")?.Where(m => m.Attributes["data-chunk-ids"]!.Value!.All(c => char.IsNumber(c)))
+                                                //.Select(m => m.SelectSingleNode(".//div"))
+                                                .ToList();
 
-        if (memberNameHolderNodes is null
-            || memberNameHolderNodes.Count == 0)  //不包含多内容
+        if (memberNameHolderNodes?.Count == 1)  //不包含多内容
         {
             var apiName = htmlDocument.DocumentNode.SelectSingleNode("//meta[@name=\"APIName\"]").GetAttributeValue("content", "");
 
             apiName = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(apiName);
 
-            var version = intelliSenseItems.First().IntelliSenseFileDescriptor.Moniker[^3..];
+            var version = GetVersionRegex().Match(intelliSenseItems.First().IntelliSenseFileDescriptor.Moniker).Value;
 
             var memberRootNodes = htmlRootNode.SelectNodes("//div[@class=\"memberInfo\"]")?
                                   .Where(x => x.ParentNode.Attributes["data-moniker"].Value.Split(" ").Any(z => z.EndsWith(version)));
@@ -65,10 +69,10 @@ public static class MSDocPageAnalyser
             for (int i = 0; i < memberNameHolderNodes.Count; i++)
             {
                 var memberNameHolderNode = memberNameHolderNodes[i];
-                var uniqueKey = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(memberNameHolderNode.SelectSingleNode("./h2").Id);
+                var uniqueKey = IntelliSenseNameUtil.NormalizeNameInHtmlForKey(memberNameHolderNode.SelectSingleNode("./div/h2")?.Id);
 
-                if (memberNameHolderNode.GetNextTagNode("div") is HtmlNode memberInfoNode
-                    && memberInfoNode.GetAttributeValue("class", string.Empty).EqualsOrdinalIgnoreCase("memberInfo"))
+                if (memberNameHolderNode.SelectSingleNode("./div")?.FirstChild?.GetNextTagNode("div") is HtmlNode memberInfoNode
+                    && memberInfoNode.GetAttributeValue("class", string.Empty).Contains("memberInfo", StringComparison.OrdinalIgnoreCase))
                 {
                     result[i] = CreatePageAnalysisResult(url, uniqueKey, memberInfoNode, intelliSenseItems);
                 }
@@ -77,6 +81,10 @@ public static class MSDocPageAnalyser
             return result;
         }
     }
+
+    #endregion Public 方法
+
+    #region Private 方法
 
     private static MSDocPageAnalysisResult CreatePageAnalysisResult(string url, string uniqueKey, HtmlNode htmlNode, IntelliSenseItemDescriptor[] intelliSenseItems)
     {
@@ -161,7 +169,7 @@ public static class MSDocPageAnalyser
 
     private static Dictionary<string, HtmlNode> GetFields(HtmlNode htmlNode)
     {
-        var tableNodes = htmlNode.SelectNodes("./table[contains(@class,'nameValue')]");
+        var tableNodes = htmlNode.SelectNodes(".//table[contains(@class,'table')]");
 
         Dictionary<string, HtmlNode> fields = new();
 
@@ -175,7 +183,7 @@ public static class MSDocPageAnalyser
                     && tableNode.GetPreTagNode("h2") is HtmlNode h2Node
                     && (h2Node.Id.EqualsOrdinal("") || h2Node.Id.EqualsOrdinalIgnoreCase("fields")))
                 {
-                    var trs = tableNode.SelectNodes(".//tr");
+                    var trs = tableNode.SelectNodes(".//tbody/tr");
                     foreach (var tr in trs)
                     {
                         var tds = tr.ChildNodes.Where(m => m.Name == "td").ToArray();
@@ -210,4 +218,9 @@ public static class MSDocPageAnalyser
 
         return fields;
     }
+
+    [GeneratedRegex("\\d+\\.\\d+")]
+    private static partial Regex GetVersionRegex();
+
+    #endregion Private 方法
 }

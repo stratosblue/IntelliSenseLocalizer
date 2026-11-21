@@ -2,31 +2,31 @@
   "profiles": {
     "IntelliSenseLocalizer - show": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] show refs"
+      "commandLineArgs": "show refs"
     },
     "IntelliSenseLocalizer - build": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] build -p Microsoft.NETCore.App.Ref -m net8.0 -pc 4 -ll 2 -cc 2 -sl \"-------- 以下为原始注释 --------\""
+      "commandLineArgs": "build -p Microsoft.NETCore.App.Ref -m net11.0 -pc 1 -ll 2 -cc 2 -sl \"-------- 以下为原始注释 --------\""
     },
     "IntelliSenseLocalizer - install": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] install auto -ctn true -cc 2"
+      "commandLineArgs": "install auto -ctn true -cc 2"
     },
     "IntelliSenseLocalizer - uninstall": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] uninstall net8.0 zh-cn"
+      "commandLineArgs": "uninstall net11.0 zh-cn"
     },
     "IntelliSenseLocalizer - clear": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] clear build"
+      "commandLineArgs": "clear build"
     },
     "IntelliSenseLocalizer - clean": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] clean"
+      "commandLineArgs": "clean"
     },
     "IntelliSenseLocalizer - translate": {
       "commandName": "Project",
-      "commandLineArgs": "[debug] translate -f \"{xml_file_path}\" -s http://127.0.0.1:16432 -p false"
+      "commandLineArgs": "translate -f \"{xml_file_path}\" -s http://127.0.0.1:16432 -p false"
     }
   }
 }

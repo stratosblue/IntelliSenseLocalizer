@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Routing.Constraints;
 
 #if !AOT_PUBLISHING
 
-using Microsoft.OpenApi.Models;
+using Microsoft.OpenApi;
 using SimpleTranslateServer;
 
 #endif
@@ -24,8 +24,7 @@ translator = new AlibabaCloudTranslator(aliAccessKeyId!, aliAccessKeySecret!);
 #if !AOT_PUBLISHING
 
 builder.Services.Configure<RouteOptions>(options => options.SetParameterPolicy<RegexInlineRouteConstraint>("regex"));
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddOpenApi();
 
 #endif
 
@@ -35,8 +34,8 @@ var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.MapSwaggerUI(openApiEndpoint: "/swagger/v1/swagger.json");
+    app.MapOpenApi();
+    app.MapSwaggerUI();
 }
 
 #endif
@@ -51,22 +50,23 @@ todosApi.MapPost("/", async (HttpContext context, [FromQuery] string from, [From
 })
 #if !AOT_PUBLISHING
 
-.WithOpenApi(operation =>
+.AddOpenApiOperationTransformer((operation, context, token) =>
 {
+    operation ??= new();
     operation.RequestBody = new OpenApiRequestBody
     {
-        Content =
+        Content = new Dictionary<string, OpenApiMediaType>()
         {
             ["text/plain"] = new OpenApiMediaType
             {
                 Schema = new OpenApiSchema
                 {
-                    Type = "string",
+                    Type = JsonSchemaType.String,
                 }
             }
         }
     };
-    return operation;
+    return Task.CompletedTask;
 })
 
 #endif

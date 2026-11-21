@@ -18,13 +18,23 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    #region Private 字段
+
     private static readonly LoggingLevelSwitch s_consoleLoggingLevelSwitch = new(LogEventLevel.Verbose);
 
-    private static readonly Option<int?> s_logLevelOption = new(["-ll", "--log-level"], Resources.StringOptionLogLevelDescription);
+    private static readonly Option<int?> s_logLevelOption = new("--log-level", "-ll")
+    {
+        Description = Resources.StringOptionLogLevelDescription,
+        Recursive = true,
+    };
 
     private static Microsoft.Extensions.Logging.ILogger s_logger = null!;
 
     private static IServiceProvider s_serviceProvider = null!;
+
+    #endregion Private 字段
+
+    #region Private 方法
 
     private static int Main(string[] args)
     {
@@ -54,18 +64,22 @@ internal partial class Program
             BuildTranslateCommand(),
         };
 
-        var customOption = new Option<string?>("--custom", "Custom addon options.");
+        var customOption = new Option<string?>("--custom")
+        {
+            Description = "Custom addon options.",
+            Recursive = true,
+        };
 
-        rootCommand.AddGlobalOption(s_logLevelOption);
-        rootCommand.AddGlobalOption(customOption);
+        rootCommand.Options.Add(s_logLevelOption);
+        rootCommand.Options.Add(customOption);
 
-        var result = rootCommand.Invoke(args);
+        var parseResult = rootCommand.Parse(args);
 
-        var optionParseResult = customOption.Parse(args);
+        var result = parseResult.Invoke();
 
         // process like delay-exit-20s
-        if (optionParseResult.CommandResult.GetValueForOption(customOption) is string customOptionString
-            && Regex.Match(customOptionString, @"delay-exit-(\d+)s") is Match waitSecondsMatch
+        if (parseResult.GetValue(customOption) is string customOptionString
+            && GetDelayExitRegex().Match(customOptionString) is Match waitSecondsMatch
             && waitSecondsMatch.Groups.Count > 1
             && int.TryParse(waitSecondsMatch.Groups[1].Value, out var waitSeconds)
             && waitSeconds > 0)
@@ -76,22 +90,9 @@ internal partial class Program
         return result;
     }
 
-    #region Base
+    #endregion Private 方法
 
-    [DoesNotReturn]
-    private static void DelayExitProcess(int waitSeconds, int exitCode)
-    {
-        new Thread(_ =>
-        {
-            Console.WriteLine($"Program will exit at {waitSeconds} seconds later or press enter to exit.");
-            Thread.Sleep(waitSeconds * 1000);
-            Environment.Exit(exitCode);
-        })
-        { IsBackground = true }
-        .Start();
-        Console.ReadLine();
-        Environment.Exit(exitCode);
-    }
+    #region Base
 
     private static ServiceProvider BuildServiceProvider()
     {
@@ -117,12 +118,30 @@ internal partial class Program
 #endif
     }
 
-    private static Func<string, bool> BuildStringFilterFunc(string filterString)
+    private static Func<string, bool> BuildStringFilterFunc(string? filterString)
     {
         return string.IsNullOrEmpty(filterString)
                     ? _ => true
                     : value => Regex.IsMatch(value, filterString, RegexOptions.IgnoreCase);
     }
+
+    [DoesNotReturn]
+    private static void DelayExitProcess(int waitSeconds, int exitCode)
+    {
+        new Thread(_ =>
+        {
+            Console.WriteLine($"Program will exit at {waitSeconds} seconds later or press enter to exit.");
+            Thread.Sleep(waitSeconds * 1000);
+            Environment.Exit(exitCode);
+        })
+        { IsBackground = true }
+        .Start();
+        Console.ReadLine();
+        Environment.Exit(exitCode);
+    }
+
+    [GeneratedRegex(@"delay-exit-(\d+)s")]
+    private static partial Regex GetDelayExitRegex();
 
     private static void SetLogLevel(int? logLevel)
     {
@@ -151,19 +170,6 @@ internal partial class Program
 
     private static readonly string s_newVersionCacheFilePath = Path.Combine(LocalizerEnvironment.CacheRoot, "new_version");
 
-    private static bool TryGetCurrentVersion([NotNullWhen(true)] out Version? version)
-    {
-        var currentVersionString = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
-
-        if (currentVersionString is null
-            || !Version.TryParse(currentVersionString.Split('-')[0], out version))
-        {
-            version = null;
-            return false;
-        }
-        return true;
-    }
-
     private static bool TryCheckNewVersion([NotNullWhen(true)] out Version? newVersion)
     {
         try
@@ -183,6 +189,19 @@ internal partial class Program
         }
         newVersion = null;
         return false;
+    }
+
+    private static bool TryGetCurrentVersion([NotNullWhen(true)] out Version? version)
+    {
+        var currentVersionString = Assembly.GetEntryAssembly()?.GetCustomAttribute<AssemblyFileVersionAttribute>()?.Version;
+
+        if (currentVersionString is null
+            || !Version.TryParse(currentVersionString.Split('-')[0], out version))
+        {
+            version = null;
+            return false;
+        }
+        return true;
     }
 
     private static async Task TryGetNewVersionOnlineAsync()

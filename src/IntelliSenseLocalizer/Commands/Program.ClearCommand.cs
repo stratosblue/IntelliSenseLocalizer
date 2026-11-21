@@ -6,6 +6,8 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    #region Private 方法
+
     private static Command BuildClearCommand()
     {
         var clearCommand = new Command("clear", Resources.StringCMDClearDescription);
@@ -14,7 +16,10 @@ internal partial class Program
 
         clearCommand.Add(argument);
 
-        clearCommand.SetHandler<ClearType>(Clear, argument);
+        clearCommand.SetAction(parseResult =>
+        {
+            Clear(parseResult.GetRequiredValue(argument));
+        });
 
         return clearCommand;
     }
@@ -56,6 +61,10 @@ internal partial class Program
         }
     }
 
+    #endregion Private 方法
+
+    #region Private 枚举
+
     private enum ClearType
     {
         All = 1,
@@ -68,4 +77,6 @@ internal partial class Program
 
         Build = 1 << 4,
     }
+
+    #endregion Private 枚举
 }

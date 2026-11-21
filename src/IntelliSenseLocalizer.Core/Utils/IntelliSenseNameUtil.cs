@@ -78,8 +78,12 @@ public static class IntelliSenseNameUtil
                    .ToLowerInvariant();
     }
 
-    public static string NormalizeNameInHtmlForKey(string name)
+    public static string NormalizeNameInHtmlForKey(string? name)
     {
+        if (string.IsNullOrEmpty(name))
+        {
+            return string.Empty;
+        }
         return NormalizeName(name).Replace('.', '-')
                                   .Replace('~', '-')
                                   .Replace('_', '-')

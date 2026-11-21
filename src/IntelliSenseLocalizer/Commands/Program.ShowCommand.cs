@@ -7,11 +7,16 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
+    #region Private 方法
+
     private static Command BuildShowCommand()
     {
         var showCommand = new Command("show", Resources.StringCMDShowDescription);
 
-        var filterOption = new Option<string>(["-f", "--filter"], Resources.StringOptionFilterDescription);
+        var filterOption = new Option<string>("--filter", "-f")
+        {
+            Description = Resources.StringOptionFilterDescription
+        };
 
         {
             var showInstalledApplicationPacksCommand = new Command("packs", Resources.StringCMDShowPacksDescription)
@@ -19,14 +24,23 @@ internal partial class Program
                 filterOption
             };
 
-            showInstalledApplicationPacksCommand.SetHandler<string>(ShowInstalledApplicationPacks, filterOption);
+            showInstalledApplicationPacksCommand.SetAction((parseResult =>
+            {
+                ShowInstalledApplicationPacks(parseResult.GetRequiredValue(filterOption));
+            }));
 
-            showCommand.AddCommand(showInstalledApplicationPacksCommand);
+            showCommand.Subcommands.Add(showInstalledApplicationPacksCommand);
         }
 
         {
-            var packNameOption = new Option<string>(["-p", "--pack"], Resources.StringCMDShowOptionPackDescription);
-            var monikerOption = new Option<string>(["-m", "--moniker"], Resources.StringCMDShowOptionMonikerDescription);
+            var packNameOption = new Option<string>("--pack", "-p")
+            {
+                Description = Resources.StringCMDShowOptionPackDescription
+            };
+            var monikerOption = new Option<string>("--moniker", "-m")
+            {
+                Description = Resources.StringCMDShowOptionMonikerDescription
+            };
 
             var showInstalledApplicationPackRefsCommand = new Command("refs", Resources.StringCMDShowPackRefsDescription)
             {
@@ -35,9 +49,14 @@ internal partial class Program
                 filterOption,
             };
 
-            showInstalledApplicationPackRefsCommand.SetHandler<string, string, string>(ShowInstalledApplicationPackRefs, packNameOption, monikerOption, filterOption);
+            showInstalledApplicationPackRefsCommand.SetAction((parseResult =>
+            {
+                ShowInstalledApplicationPackRefs(packName: parseResult.GetRequiredValue(packNameOption),
+                                                 moniker: parseResult.GetRequiredValue(monikerOption),
+                                                 filterString: parseResult.GetRequiredValue(filterOption));
+            }));
 
-            showCommand.AddCommand(showInstalledApplicationPackRefsCommand);
+            showCommand.Subcommands.Add(showInstalledApplicationPackRefsCommand);
         }
 
         return showCommand;
@@ -84,4 +103,6 @@ internal partial class Program
             Console.WriteLine(packDescriptor);
         }
     }
+
+    #endregion Private 方法
 }

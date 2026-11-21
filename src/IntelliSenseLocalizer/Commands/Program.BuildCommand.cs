@@ -12,7 +12,7 @@ namespace IntelliSenseLocalizer;
 
 internal partial class Program
 {
-    private const string PackCsprojFileName = "pack.csproj";
+    #region Private 字段
 
     private const string NugetPackageName = "IntelliSenseLocalizer.LanguagePack";
 
@@ -47,18 +47,51 @@ internal partial class Program
 </Project>
 ";
 
+    private const string PackCsprojFileName = "pack.csproj";
+
+    #endregion Private 字段
+
     #region Private 方法
 
     private static Command BuildBuildCommand()
     {
-        var packNameOption = new Option<string>(["-p", "--pack"], Resources.StringCMDBuildOptionPackDescription);
-        var monikerOption = new Option<string>(["-m", "--moniker"], Resources.StringCMDBuildOptionMonikerDescription);
-        var localeOption = new Option<string>(["-l", "--locale"], () => LocalizerEnvironment.CurrentLocale, Resources.StringCMDBuildOptionLocaleDescription);
-        var contentCompareTypeOption = new Option<ContentCompareType>(["-cc", "--content-compare"], () => ContentCompareType.OriginFirst, Resources.StringCMDBuildOptionContentCompareDescription);
-        var separateLineOption = new Option<string?>(["-sl", "--separate-line"], Resources.StringCMDBuildOptionSeparateLineDescription);
-        var outputOption = new Option<string>(["-o", "--output"], () => LocalizerEnvironment.OutputRoot, Resources.StringCMDBuildOptionOutputDescription);
-        var parallelCountOption = new Option<int>(["-pc", "--parallel-count"], () => 2, Resources.StringCMDBuildOptionParallelCountDescription);
-        var nocacheOption = new Option<bool>(["-nc", "--no-cache"], () => false, Resources.StringCMDBuildOptionNoCacheDescription);
+        var packNameOption = new Option<string>("--pack", "-p")
+        {
+            Description = Resources.StringCMDBuildOptionPackDescription,
+        };
+        var monikerOption = new Option<string>("--moniker", "-m")
+        {
+            Description = Resources.StringCMDBuildOptionMonikerDescription,
+        };
+        var localeOption = new Option<string>("--locale", "-l")
+        {
+            Description = Resources.StringCMDBuildOptionLocaleDescription,
+            DefaultValueFactory = _ => LocalizerEnvironment.CurrentLocale,
+        };
+        var contentCompareTypeOption = new Option<ContentCompareType>("--content-compare", "-cc")
+        {
+            Description = Resources.StringCMDBuildOptionContentCompareDescription,
+            DefaultValueFactory = _ => ContentCompareType.OriginFirst,
+        };
+        var separateLineOption = new Option<string?>("--separate-line", "-sl")
+        {
+            Description = Resources.StringCMDBuildOptionSeparateLineDescription,
+        };
+        var outputOption = new Option<string>("--output", "-o")
+        {
+            Description = Resources.StringCMDBuildOptionOutputDescription,
+            DefaultValueFactory = _ => LocalizerEnvironment.OutputRoot,
+        };
+        var parallelCountOption = new Option<int>("--parallel-count", "-pc")
+        {
+            Description = Resources.StringCMDBuildOptionParallelCountDescription,
+            DefaultValueFactory = _ => 1,
+        };
+        var nocacheOption = new Option<bool>("--no-cache", "-nc")
+        {
+            Description = Resources.StringCMDBuildOptionNoCacheDescription,
+            DefaultValueFactory = _ => false,
+        };
 
         var buildCommand = new Command("build", Resources.StringCMDBuildDescription)
         {
@@ -72,20 +105,33 @@ internal partial class Program
             nocacheOption,
         };
 
-        buildCommand.SetHandler<string, string, string, ContentCompareType, string?, string, bool, int, int?>(BuildLocalizedIntelliSenseFile, packNameOption, monikerOption, localeOption, contentCompareTypeOption, separateLineOption, outputOption, nocacheOption, parallelCountOption, s_logLevelOption);
+        buildCommand.SetAction((parseResult, cancellationToken) =>
+        {
+            return BuildLocalizedIntelliSenseFile(packName: parseResult.GetValue(packNameOption),
+                                                  moniker: parseResult.GetRequiredValue(monikerOption),
+                                                  locale: parseResult.GetRequiredValue(localeOption),
+                                                  contentCompareType: parseResult.GetRequiredValue(contentCompareTypeOption),
+                                                  separateLine: parseResult.GetValue(separateLineOption),
+                                                  outputRoot: parseResult.GetRequiredValue(outputOption),
+                                                  noCache: parseResult.GetValue(nocacheOption),
+                                                  parallelCount: parseResult.GetValue(parallelCountOption),
+                                                  logLevel: parseResult.GetValue(s_logLevelOption),
+                                                  cancellationToken: cancellationToken);
+        });
 
         return buildCommand;
     }
 
-    private static void BuildLocalizedIntelliSenseFile(string packName,
-                                                       string moniker,
-                                                       string locale,
-                                                       ContentCompareType contentCompareType,
-                                                       string? separateLine,
-                                                       string outputRoot,
-                                                       bool noCache,
-                                                       int parallelCount,
-                                                       int? logLevel)
+    private static async Task BuildLocalizedIntelliSenseFile(string? packName,
+                                                             string moniker,
+                                                             string locale,
+                                                             ContentCompareType contentCompareType,
+                                                             string? separateLine,
+                                                             string outputRoot,
+                                                             bool noCache,
+                                                             int parallelCount,
+                                                             int? logLevel,
+                                                             CancellationToken cancellationToken)
     {
         if (contentCompareType == ContentCompareType.Default)
         {
@@ -152,13 +198,17 @@ internal partial class Program
 
         SetLogLevel(logLevel);
 
-        GenerateAsync().Wait();
+        await GenerateAsync(cancellationToken);
 
-        async Task GenerateAsync()
+        async Task GenerateAsync(CancellationToken cancellationToken)
         {
             var generator = s_serviceProvider.GetRequiredService<LocalizeIntelliSenseGenerator>();
 
-            var parallelOptions = new ParallelOptions() { MaxDegreeOfParallelism = parallelCount };
+            var parallelOptions = new ParallelOptions()
+            {
+                MaxDegreeOfParallelism = parallelCount,
+                CancellationToken = cancellationToken,
+            };
 
             //处理文件
             int refCount = 0;
@@ -198,7 +248,7 @@ internal partial class Program
                         ParallelCount = parallelCount
                     };
 
-                    await generator.GenerateAsync(context, default);
+                    await generator.GenerateAsync(context, cancellationToken);
                 });
             }
 
@@ -211,7 +261,7 @@ internal partial class Program
                 var rootPath = Path.Combine(LocalizerEnvironment.BuildRoot, outputPackName);
                 DirectoryUtil.CheckDirectory(rootPath);
 
-                var finalZipFilePath = await PackLanguagePackAsync(rootPath, moniker, locale, contentCompareType, outputRoot);
+                var finalZipFilePath = await PackLanguagePackAsync(rootPath, moniker, locale, contentCompareType, outputRoot, cancellationToken);
 
                 s_logger.LogWarning("localization pack is saved at {finalZipFilePath}.", finalZipFilePath);
             }
@@ -228,7 +278,7 @@ internal partial class Program
         }
     }
 
-    private static async Task<string> PackLanguagePackAsync(string sourceRootPath, string moniker, string locale, ContentCompareType contentCompareType, string outputRoot)
+    private static async Task<string> PackLanguagePackAsync(string sourceRootPath, string moniker, string locale, ContentCompareType contentCompareType, string outputRoot, CancellationToken cancellationToken)
     {
         var cultureInfo = CultureInfo.GetCultureInfo(locale);
 
@@ -241,11 +291,11 @@ internal partial class Program
 
         var languagePackManifest = new LanguagePackManifest(LanguagePackManifest.CurrentVersion, moniker, locale, contentCompareType, packs, metadata);
 
-        await File.WriteAllTextAsync(Path.Combine(sourceRootPath, LanguagePackManifest.ManifestFileName), languagePackManifest.ToJson(), default);
+        await File.WriteAllTextAsync(Path.Combine(sourceRootPath, LanguagePackManifest.ManifestFileName), languagePackManifest.ToJson(), cancellationToken);
 
         var packCsprojFullName = Path.Combine(sourceRootPath, PackCsprojFileName);
 
-        await File.WriteAllTextAsync(packCsprojFullName, PackCsprojContent, default);
+        await File.WriteAllTextAsync(packCsprojFullName, PackCsprojContent, cancellationToken);
 
         var langPackVersion = new LangPackVersion(moniker, DateTime.UtcNow, contentCompareType, cultureInfo);
         var nugetVersion = langPackVersion.Encode();
